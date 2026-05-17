@@ -4,18 +4,22 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Attributes\Appends;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'otp_code', 'otp_expires_at', 'estado'])]
 #[Hidden(['password', 'remember_token'])]
+#[Appends(['role'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles, HasApiTokens;
 
     /**
      * Get the attributes that should be cast.
@@ -28,5 +32,25 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function getRoleAttribute()
+    {
+        return $this->getRoleNames()->first();
+    }
+
+    public function dispositivos()
+    {
+        return $this->hasMany(DispositivoConocido::class);
+    }
+
+    public function estacionActual()
+    {
+        return $this->hasOne(Estacion::class, 'estudiante_actual_id');
+    }
+
+    public function perfil()
+    {
+        return $this->hasOne(Perfil::class, 'user_id');
     }
 }
