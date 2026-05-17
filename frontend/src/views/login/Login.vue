@@ -37,11 +37,11 @@ const handleSubmit = async () => {
             email: email.value,
             password: password.value,
             fingerprint: getFingerPrint(),
-            remember: rememberMe.value // Puedes meter una huella genérica o calcularla
+            remember: rememberMe.value 
         });
 
         if (success) {
-            router.push('/dashboard');
+            router.push('/');
         } else if (authStore.requiresOtp) {
             router.push('verify-otp');
         } else {
@@ -58,7 +58,7 @@ const handleSubmit = async () => {
 
 <template>
     <div
-        class="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4">
+        class="min-h-screen bg-linear-to-br from-gray-900 via-blue-900 to-gray-900 flex items-center justify-center p-4">
         <div class="w-full max-w-md">
 
             <!-- Logo y Título -->
@@ -76,7 +76,7 @@ const handleSubmit = async () => {
 
                 <!-- Alerta de Error -->
                 <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start gap-3">
-                    <AlertCircle class="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <AlertCircle class="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
                     <p class="text-sm text-red-800">{{ error }}</p>
                 </div>
 

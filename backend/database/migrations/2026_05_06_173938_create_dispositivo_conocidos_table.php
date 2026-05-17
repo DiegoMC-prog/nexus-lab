@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('nombre_dispositivo');
-            $table->string('fingerprint')->unique();
+            $table->string('fingerprint');
             $table->timestamps();
             $table->softDeletes();
         });
