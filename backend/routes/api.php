@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LaboratorioController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,4 +21,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::apiResource('laboratorios', LaboratorioController::class);
+    Route::apiResource('users', UserController::class);
+    Route::get('/roles', [UserController::class, 'getRoles']);
 });

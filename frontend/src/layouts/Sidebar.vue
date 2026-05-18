@@ -17,19 +17,20 @@ const authStore = useAuthStore();
 
 // 1. Añadimos un array de roles permitidos para cada ruta
 const navItems = [
-    { to: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['administrador', 'supervisor', 'operador'] },
-    { to: '/monitoring', label: 'Monitoreo', icon: Activity, roles: ['administrador', 'supervisor', 'operador'] },
-    { to: '/history', label: 'Historial', icon: History, roles: ['administrador', 'supervisor'] },
-    { to: '/laboratorios', label: 'Laboratorios', icon: Building2, roles: ['administrador', 'supervisor'] },
-    { to: '/horarios', label: 'Horarios', icon: Calendar, roles: ['administrador', 'supervisor', 'operador'] },
-    { to: '/users', label: 'Usuarios', icon: Users, roles: ['administrador'] },
-    { to: '/roles', label: 'Roles', icon: Shield, roles: ['administrador'] },
-    { to: '/settings', label: 'Configuración', icon: Settings, roles: ['administrador', 'supervisor'] }
+    { to: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'supervisor', 'operador'] },
+    { to: '/monitoring', label: 'Monitoreo', icon: Activity, roles: ['admin', 'supervisor', 'operador'] },
+    { to: '/history', label: 'Historial', icon: History, roles: ['admin', 'supervisor'] },
+    { to: '/laboratorios', label: 'Laboratorios', icon: Building2, roles: ['admin', 'supervisor'] },
+    { to: '/horarios', label: 'Horarios', icon: Calendar, roles: ['admin', 'supervisor', 'operador'] },
+    { to: '/users', label: 'Usuarios', icon: Users, roles: ['admin'] },
+    { to: '/roles', label: 'Roles', icon: Shield, roles: ['admin'] },
+    { to: '/settings', label: 'Configuración', icon: Settings, roles: ['admin', 'supervisor'] }
 ];
 
 // 2. Filtramos las opciones dinámicamente según el rol del usuario actual
 const visibleNavItems = computed(() => {
     const userRole = authStore.user?.role?.toLowerCase() || '';
+    console.log(userRole);
     return navItems.filter(item => item.roles.includes(userRole));
 });
 </script>
@@ -51,10 +52,12 @@ const visibleNavItems = computed(() => {
         <nav class="flex-1 p-4">
             <ul class="space-y-2">
                 <li v-for="item in visibleNavItems" :key="item.to">
-                    <router-link :to="item.to" custom v-slot="{ isActive, navigate }">
+                    <router-link :to="item.to" custom v-slot="{ isActive, isExactActive, navigate }">
                         <a @click="navigate" :class="[
                             'flex items-center gap-3 px-4 py-3 rounded-lg transition-colors cursor-pointer',
-                            isActive
+
+                            // 2. CORREGIDO: Si es la raíz '/', evalúa coincidencia exacta. Si no, coincidencia normal.
+                            (item.to === '/' ? isExactActive : isActive)
                                 ? 'bg-blue-600 text-white'
                                 : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                         ]">

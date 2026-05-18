@@ -6,7 +6,7 @@ use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Override;
 
-class StoreUserRequest extends FormRequest
+class UpdateUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,16 +23,18 @@ class StoreUserRequest extends FormRequest
      */
     public function rules(): array
     {
+        $userId = $this->route('user')?->id ?? $this->route('user');
+
         return [
-            'name' => 'required|string|max:200|unique:users,name',
-            'email' => 'required|email|string|max:255|unique:users,email',
+            'name' => 'required|string|max:200|unique:users,name,' . $userId,
+            'email' => 'required|email|string|max:255|unique:users,email,' . $userId,
             'role' => 'required|integer|exists:roles,id',
             'estado' => 'required|string',
         ];
     }
 
     #[Override]
-    public function messages()
+    public function messages(): array
     {
         return [
             // Mensajes para el campo 'name'
