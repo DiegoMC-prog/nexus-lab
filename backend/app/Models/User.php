@@ -16,7 +16,7 @@ use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'password', 'otp_code', 'otp_expires_at', 'estado'])]
 #[Hidden(['password', 'remember_token'])]
-#[Appends(['role'])]
+#[Appends(['role', 'permisos'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
@@ -38,6 +38,11 @@ class User extends Authenticatable
     public function getRoleAttribute()
     {
         return $this->getRoleNames()->first();
+    }
+
+    public function getPermisosAttribute()
+    {
+        return $this->getAllPermissions()->pluck('name');
     }
 
     public function dispositivos()

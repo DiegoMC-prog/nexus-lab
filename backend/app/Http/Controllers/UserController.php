@@ -7,13 +7,27 @@ use App\Http\Requests\User\UpdateUserRequest;
 use App\Mail\TemporaryPasswordMail;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Str;
+use Override;
 
-class UserController extends Controller
+class UserController extends Controller implements HasMiddleware
 {
+    #[Override]
+    public static function middleware()
+    {
+        return [
+            new Middleware('permission:usuarios.ver', only: ['index', 'show']),
+            new Middleware('permission:usuarios.crear', only: ['store']),
+            new Middleware('permission:usuarios.editar', only: ['update']),
+            new Middleware('permission:usuarios.eliminar', only: ['destroy']),
+        ];
+    }
+
     /**
      * Display a listing of the resource.
      */

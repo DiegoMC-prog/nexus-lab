@@ -28,8 +28,6 @@ class AuthController extends Controller
 
         $dispositivo = $user->dispositivos()->where('fingerprint', $credenciales->fingerprint)->exists();
 
-        $role = $user->getRoleNames()->first();
-
         if ($dispositivo) {
             return response()->json([
                 'message' => 'Usuario autenticado, Bienvenido de vuelta',
@@ -40,6 +38,7 @@ class AuthController extends Controller
                     'email' => $user->email,
                     'estado' => $user->estado,
                     'role' => $user->role,
+                    'permisos' => $user->permisos,
                 ]
             ]);
         }
@@ -94,6 +93,7 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'estado' => $user->estado,
                 'role' => $user->role,
+                'permisos' => $user->permisos,
             ]
         ]);
     }

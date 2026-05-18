@@ -123,7 +123,7 @@ const goToSettings = () => {
 
 const getRoleBadgeColor = (role: string) => {
     switch (role?.toLowerCase()) {
-        case 'administrador':
+        case 'admin':
             return 'bg-purple-100 text-purple-700';
         case 'supervisor':
             return 'bg-blue-100 text-blue-700';

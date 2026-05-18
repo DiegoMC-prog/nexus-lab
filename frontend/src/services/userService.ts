@@ -31,7 +31,7 @@ export const userService = {
     },
 
     async cargarRoles(): Promise<Role[]> {
-        const response = await api.get<Role[]>('/roles');
+        const response = await api.get<Role[]>('users/roles');
         return response.data;
     }
 }

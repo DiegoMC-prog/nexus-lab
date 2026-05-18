@@ -11,6 +11,7 @@ import { userService } from '@/services/userService'; // Ajusta la ruta a tu ser
 import UserModal from './UserModal.vue';
 import UserDeleteModal from './UserDeleteModal.vue';
 import BasePagination from '@/components/BasePagination.vue';
+import { useAuthStore } from '@/stores/auth';
 
 // Configuración visual para Roles
 const rolesConfig: Record<string, { displayName: string; color: string }> = {
@@ -22,8 +23,11 @@ const rolesConfig: Record<string, { displayName: string; color: string }> = {
 
 // --- ESTADO REACTIVO DE LA API ---
 const users = ref<User[]>([]);
-const isLoading = ref(false);
+const isLoading = ref(true);
 const isSaving = ref(false);
+const authStore = useAuthStore();
+
+const isInitializing = ref(true);
 
 // Filtros
 const searchTerm = ref('');
@@ -77,9 +81,26 @@ watch(currentPage, () => {
     fetchUsers();
 });
 
-// Carga inicial
-onMounted(() => {
-    fetchUsers();
+// Carga inicial optimizada
+onMounted(async () => {
+    // Iniciamos la carga explícitamente
+    isLoading.value = true;
+    isInitializing.value = true;
+
+    try {
+        // Dispara ambas peticiones al mismo tiempo (Multitasking real)
+        await Promise.all([
+            authStore.refreshPermisos(),
+            fetchUsers()
+        ]);
+    } catch (error) {
+        // fetchUsers ya tiene su propio catch, pero por seguridad:
+        console.error('Error en la carga inicial general:', error);
+    } finally {
+        // Nos aseguramos de apagar el loading pase lo que pase
+        isLoading.value = false;
+        isInitializing.value = false;
+    }
 });
 
 // --- ACCIONES Y ORQUESTACIÓN ---
@@ -149,7 +170,11 @@ const getStatusConfig = (estado: string) => {
                 <h1 class="text-3xl font-semibold text-gray-900 mb-2">Gestión de Usuarios</h1>
                 <p class="text-gray-600">{{ totalUsers }} usuarios registrados en el sistema</p>
             </div>
-            <button @click="openCreateDialog"
+            <!-- Si está inicializando, muestra un esqueleto animado -->
+            <div v-if="isInitializing" class="w-32 h-10 bg-gray-200 animate-pulse rounded-md"></div>
+
+            <!-- Si ya terminó, evalúa el permiso real -->
+            <button v-else-if="authStore.can('usuarios.crear')" @click="openCreateDialog"
                 class="bg-blue-600 hover:bg-blue-700 text-white gap-2 flex items-center px-4 py-2 rounded-md transition-colors text-sm font-medium shadow-sm cursor-pointer">
                 <Plus class="w-4 h-4" />
                 Nuevo Usuario
@@ -251,11 +276,11 @@ const getStatusConfig = (estado: string) => {
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-1">
-                                    <button @click="openEditDialog(user)"
+                                    <button v-if="authStore.can('usuarios.editar')" @click="openEditDialog(user)"
                                         class="p-1.5 rounded text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors cursor-pointer">
                                         <Edit class="w-4 h-4" />
                                     </button>
-                                    <button @click="openDeleteDialog(user)"
+                                    <button v-if="authStore.can('usuarios.eliminar')" @click="openDeleteDialog(user)"
                                         class="p-1.5 rounded text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors cursor-pointer">
                                         <Trash2 class="w-4 h-4" />
                                     </button>

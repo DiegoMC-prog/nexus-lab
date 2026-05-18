@@ -29,6 +29,11 @@ export const authService = {
         return response.data;
     },
 
+    async getPermisos() {
+        const response = await api.get(`/user/permisos`);
+        return response.data;
+    },
+
     async logout(): Promise<void> {
         await api.post('/logout');
     }

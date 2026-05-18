@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useErrorStore } from '@/stores/errorStore';
 import ConnectionError from '@/components/ConnectionError.vue';
 import api from '@/services/api';
+import type { User } from './types/auth';
 
 const authStore = useAuthStore();
 const errorStore = useErrorStore();
@@ -14,7 +15,7 @@ const isBooting = ref(true);
 onMounted(async () => {
   if (authStore.isAuthenticated) {
     try {
-      const response = await api.get('/user');
+      const response = await api.get<User>('/user');
       authStore.refreshUser(response.data);
 
     } catch (error) {

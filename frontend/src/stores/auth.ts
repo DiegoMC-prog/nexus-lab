@@ -13,7 +13,10 @@ export const useAuthStore = defineStore('auth', {
 
     getters: {
         isAuthenticated: (state) => !!state.token,
-        userRole: (state) => state.user?.role || 'guest'
+        userRole: (state) => state.user?.role || 'guest',
+        can: (state) => (permiso: string): boolean => {
+            return state.user?.permisos?.includes(permiso) || false;
+        }
     },
 
     actions: {
@@ -80,6 +83,21 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
+        async refreshPermisos() {
+            try {
+                if (!this.user?.id) return;
+
+                const data = await authService.getPermisos();
+
+                this.user.permisos = data;
+
+                const storage = localStorage.getItem('token') ? localStorage : sessionStorage;
+                storage.setItem('user', JSON.stringify(this.user));
+            } catch (error) {
+                console.error("Error al sincronizar los permisos con el servidor:", error);
+            }
+        },
+
         async logout() {
             try {
                 if (this.token) {
@@ -96,11 +114,9 @@ export const useAuthStore = defineStore('auth', {
 
         // Dentro de las actions en authStore.ts
         refreshUser(userData: User) {
-            this.user = userData; // Actualiza la memoria RAM
-
-            // 🌟 REPARACIÓN FÍSICA: Detectamos dónde está el token y guardamos ahí el usuario
+            this.user = userData; 
             const storage = localStorage.getItem('token') ? localStorage : sessionStorage;
-            storage.setItem('user', JSON.stringify(userData));
+            storage.setItem('user', JSON.stringify(this.user));
         },
 
         setSession(newToken: string, userData: User) {
