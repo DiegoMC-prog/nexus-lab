@@ -1,5 +1,6 @@
 import MainLayout from "@/layouts/MainLayout.vue";
 import Dashboard from "@/views/dashboard/Dashboard.vue";
+import RoleList from "@/views/roles/RoleList.vue";
 import UserList from "@/views/users/UserList.vue";
 import type { RouteRecordRaw } from "vue-router";
 
@@ -44,6 +45,12 @@ export const routes: Array<RouteRecordRaw> = [
                 component: UserList,
                 meta: { title: 'Gestion de Usuarios' },
             },
+            {
+                path: '/roles',
+                name: 'Roles',
+                component: RoleList,
+                meta: { title: 'Gestion de Roles'},
+            }
         ]
     }
 

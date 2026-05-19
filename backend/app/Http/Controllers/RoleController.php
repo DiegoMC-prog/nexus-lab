@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Role\StoreRoleRequest;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
@@ -13,7 +14,13 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::query()->with(['permissions:id,name'])->get(['id', 'name']);
+        $roles = Role::query()->with('permissions:id,name')->get(['id', 'name'])->map(function ($role) {
+            return [
+                'id'          => $role->id,
+                'name'        => $role->name,
+                'permissions' => $role->permissions->pluck('name'),
+            ];
+        });
 
         return response()->json([
             "roles" => $roles,
@@ -23,32 +30,26 @@ class RoleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreRoleRequest $request, string | int $id)
     {
-        //
-    }
-    
-    /**
-     * Display the specified resource.
-     */
-    public function show(Role $role)
-    {
-        //
+        $data = (object) $request->validated();
+
+        $role = Role::findOrFail($id);
+
+        $role->syncPermissions($data->permissions);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Permisos actualizados correctamente para el rol: ' . $role->name
+        ], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Role $role)
+    public function getPermisos()
     {
-        //
-    }
+        $permisos = Permission::pluck('name');
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Role $role)
-    {
-        //
+        return response()->json([
+            'permisos' => $permisos,
+        ]);
     }
 }
