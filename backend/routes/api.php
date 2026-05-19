@@ -36,11 +36,14 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json($permisos);
     });
 
+    //modulo gestion de laboratorios
     Route::apiResource('laboratorios', LaboratorioController::class);
     
+    //modulo gestion de usuarios
     Route::get('users/roles', [UserController::class, 'getRoles'])->middleware('permission:usuarios.ver');
     Route::apiResource('users', UserController::class);
 
+    //modulo roles
     Route::get('/roles/permisos', [RoleController::class, 'getPermisos']);
     Route::put('/roles/{id}/permissions', [RoleController::class, 'store']);
     Route::get('roles', [RoleController::class, 'index']);

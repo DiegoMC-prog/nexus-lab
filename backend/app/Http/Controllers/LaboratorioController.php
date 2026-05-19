@@ -12,9 +12,34 @@ class LaboratorioController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $laboratorios = Laboratorio::all();
+        $query = Laboratorio::query();
+
+        $query->when($request->search, function ($q, $search) {
+            $q->where(function ($subQuery) use ($search) {
+                $subQuery->where('nombre', 'ILIKE', "%{$search}%")
+                    ->orWhere('pabellon', 'ILIKE', "%{$search}%")
+                    ->orWhere('piso', 'ILIKE', "%{$search}%");
+            });
+        });
+
+        $query->when($request->filled('activo') && $request->activo !== 'all', function ($q) use ($request) {
+            $activoValue = filter_var($request->activo, FILTER_VALIDATE_BOOLEAN);
+            $q->where('activo', $activoValue);
+        });
+
+        $laboratorios = $query->latest()->paginate(6);
+
+        $laboratorios->through(function ($laboratorio) {
+            return [
+                'id' => $laboratorio->id,
+                'nombre' => $laboratorio->nombre,
+                'pabellon' => $laboratorio->pabellon,
+                'piso' => $laboratorio->piso,
+                'activo' => $laboratorio->activo,
+            ];
+        });
 
         return response()->json([
             'laboratorios' => $laboratorios,

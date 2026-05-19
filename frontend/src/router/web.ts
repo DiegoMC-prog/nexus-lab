@@ -1,5 +1,6 @@
 import MainLayout from "@/layouts/MainLayout.vue";
 import Dashboard from "@/views/dashboard/Dashboard.vue";
+import LaboratorioList from "@/views/laboratorios/LaboratorioList.vue";
 import RoleList from "@/views/roles/RoleList.vue";
 import UserList from "@/views/users/UserList.vue";
 import type { RouteRecordRaw } from "vue-router";
@@ -37,7 +38,7 @@ export const routes: Array<RouteRecordRaw> = [
                 path: '',
                 name: 'dashboard',
                 component: Dashboard,
-                meta: { title: 'Dashboard'},
+                meta: { title: 'Dashboard' },
             },
             {
                 path: '/users',
@@ -49,7 +50,13 @@ export const routes: Array<RouteRecordRaw> = [
                 path: '/roles',
                 name: 'Roles',
                 component: RoleList,
-                meta: { title: 'Gestion de Roles'},
+                meta: { title: 'Gestion de Roles' },
+            },
+            {
+                path: '/laboratorios',
+                name: 'Laboratorios',
+                component: LaboratorioList,
+                meta: { title: 'Gestion de Laboratorios' },
             }
         ]
     }
