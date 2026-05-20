@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CarreraController;
 use App\Http\Controllers\LaboratorioController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RoleController;
@@ -35,6 +36,9 @@ Route::middleware('auth:sanctum')->group(function () {
         
         return response()->json($permisos);
     });
+
+    //modulo gestion de carreras
+    Route::apiResource('carreras', CarreraController::class);
 
     //modulo gestion de laboratorios
     Route::apiResource('laboratorios', LaboratorioController::class);
