@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ConfigAlertas;
+use App\Models\ConfigAlerta;
 use Illuminate\Http\Request;
 
-class ConfigAlertasController extends Controller
+class ConfigAlertaController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -26,7 +26,7 @@ class ConfigAlertasController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(ConfigAlertas $configAlertas)
+    public function show(ConfigAlerta $configAlerta)
     {
         //
     }
@@ -34,7 +34,7 @@ class ConfigAlertasController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, ConfigAlertas $configAlertas)
+    public function update(Request $request, ConfigAlerta $configAlerta)
     {
         //
     }
@@ -42,7 +42,7 @@ class ConfigAlertasController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(ConfigAlertas $configAlertas)
+    public function destroy(ConfigAlerta $configAlerta)
     {
         //
     }
