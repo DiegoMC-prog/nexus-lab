@@ -3,6 +3,7 @@ import CarreraList from "@/views/carreras/CarreraList.vue";
 import Dashboard from "@/views/dashboard/Dashboard.vue";
 import LaboratorioList from "@/views/laboratorios/LaboratorioList.vue";
 import RoleList from "@/views/roles/RoleList.vue";
+import SemestreList from "@/views/semestres/SemestreList.vue";
 import UserList from "@/views/users/UserList.vue";
 import type { RouteRecordRaw } from "vue-router";
 
@@ -65,6 +66,12 @@ export const routes: Array<RouteRecordRaw> = [
                 component: CarreraList,
                 meta: { title: 'Gestion de carreras' },
             },
+            {
+                path: '/semestres',
+                name: 'Semestres',
+                component: SemestreList,
+                meta: { title: 'Gestion de Ciclos Academicos' }
+            }
         ]
     }
 
