@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cursos', function (Blueprint $table) {
+        Schema::create('semestres_academicos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('carrera_id')->constrained('carreras')->onDelete('restrict');
-            $table->foreignId('semestre_academico_id')->constrained('semestres_academicos')->onDelete('restrict');
+            $table->string('nombre', 100);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('cursos');
+        Schema::dropIfExists('semestres_academicos');
     }
 };
