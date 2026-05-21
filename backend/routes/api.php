@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarreraController;
+use App\Http\Controllers\CursoController;
 use App\Http\Controllers\LaboratorioController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\SemestreAcademicoController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +41,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //modulo gestion de carreras
     Route::apiResource('carreras', CarreraController::class);
+
+    //modulo semestres
+    Route::apiResource('semestres', SemestreAcademicoController::class);
+
+    //modulo gestion de cursos
+    Route::apiResource('cursos', CursoController::class);
 
     //modulo gestion de laboratorios
     Route::apiResource('laboratorios', LaboratorioController::class);
