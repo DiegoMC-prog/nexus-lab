@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Table('etaciones')]
+#[Table('estaciones')]
 #[Fillable(
     'laboratorio_id',
     'estudiante_actual_id',
@@ -25,12 +25,12 @@ class Estacion extends Model
 
     public function laboratorio()
     {
-        return $this->belongsTo(Laboratorio::class);
+        return $this->belongsTo(Laboratorio::class, 'laboratorio_id');
     }
 
     public function estudianteActual()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'estudiante_actual_id');
     }
 
     public function Hardware()
@@ -38,9 +38,14 @@ class Estacion extends Model
         return $this->hasOne(PerfilHardware::class, 'estacion_id');
     }
 
+    public function telemetrias()
+    {
+        return $this->hasMany(LogsTelemetria::class, 'estacion_id');
+    }
+
     public function ultimaTelemetria()
     {
-        return $this->hasOne(LogsTelemetria::class)->latestOfMany();
+        return $this->hasOne(LogsTelemetria::class, 'estacion_id')->latestOfMany();
     }
 
     public function alertas()
@@ -48,5 +53,8 @@ class Estacion extends Model
         return $this->hasMany(Alerta::class, 'estacion_id');
     }
 
-    
+    public function logsComandos()
+    {
+        return $this->hasMany(LogsComando::class, 'estacion_id');
+    }
 }

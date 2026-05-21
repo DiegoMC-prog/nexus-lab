@@ -12,4 +12,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ConfigAlerta extends Model
 {
     use SoftDeletes;
+
+    public function alertas()
+    {
+        return $this->hasMany(Alerta::class, 'config_alerta_id');
+    }
 }

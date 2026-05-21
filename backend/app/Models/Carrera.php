@@ -11,8 +11,8 @@ class Carrera extends Model
 {
     use SoftDeletes;
 
-    public function cursos()
+    public function materias()
     {
-        return $this->hasMany(Curso::class, 'carrera_id');
+        return $this->hasMany(Materia::class, 'carrera_id');
     }
 }

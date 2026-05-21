@@ -35,7 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/user/permisos', function () {
         $permisos = request()->user()->getAllPermissions()->pluck('name');
-        
+
         return response()->json($permisos);
     });
 
@@ -46,12 +46,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('semestres/form', [SemestreAcademicoController::class, 'getFormData']);
     Route::apiResource('semestres', SemestreAcademicoController::class);
 
-    //modulo gestion de cursos
-    Route::apiResource('cursos', CursoController::class);
-
     //modulo gestion de laboratorios
     Route::apiResource('laboratorios', LaboratorioController::class);
-    
+
     //modulo gestion de usuarios
     Route::get('users/roles', [UserController::class, 'getRoles'])->middleware('permission:usuarios.ver');
     Route::apiResource('users', UserController::class);

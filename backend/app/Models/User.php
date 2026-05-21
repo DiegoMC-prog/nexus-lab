@@ -59,4 +59,29 @@ class User extends Authenticatable
     {
         return $this->hasOne(Perfil::class, 'user_id');
     }
+
+    public function grupos()
+    {
+        return $this->belongsToMany(Grupo::class, 'grupo_user');
+    }
+
+    public function horariosDocente()
+    {
+        return $this->hasMany(Horario::class, 'docente_id');
+    }
+
+    public function logsComandos()
+    {
+        return $this->hasMany(LogsComando::class, 'usuario_id');
+    }
+
+    public function biometriaVocal()
+    {
+        return $this->hasOne(BiometriaVocal::class, 'usuario_id');
+    }
+
+    public function biometriaFacial()
+    {
+        return $this->hasOne(BiometriaFacial::class, 'user_id');
+    }
 }

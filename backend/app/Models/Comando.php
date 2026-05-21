@@ -10,4 +10,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Comando extends Model
 {
     use SoftDeletes;
+
+    public function logsComandos()
+    {
+        return $this->hasMany(LogsComando::class, 'comando_id');
+    }
 }

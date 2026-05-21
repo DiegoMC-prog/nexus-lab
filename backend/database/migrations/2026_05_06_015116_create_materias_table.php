@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('materias', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('curso_id')->constrained('cursos')->onDelete('restrict');
+            $table->foreignId('semestre_academico_id')->constrained('semestres_academicos')->onDelete('restrict');
+            $table->foreignId('carrera_id')->constrained('carreras')->onDelete('restrict');
             $table->string('codigo', 50)->unique(); // Ej: 'INF-121'
             $table->string('nombre', 255);
             $table->integer('creditos')->nullable();

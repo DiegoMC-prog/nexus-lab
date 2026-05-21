@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Table('semestres_academicos')]
-#[Fillable('nombre')]
-class SemestreAcademico extends Model
+#[Table('biometria_vocal')]
+#[Fillable(['usuario_id', 'firma_mcc', 'frecuencia_muestreo', 'frase_registro', 'umbral_confianza'])]
+class BiometriaVocal extends Model
 {
     use SoftDeletes;
 
-    public function materias()
+    public function usuario()
     {
-        return $this->hasMany(Materia::class, 'semestre_academico_id');
+        return $this->belongsTo(User::class, 'usuario_id');
     }
 }

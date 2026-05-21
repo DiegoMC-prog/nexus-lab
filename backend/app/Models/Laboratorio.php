@@ -13,7 +13,7 @@ class Laboratorio extends Model
 
     public function estaciones()
     {
-        return $this->hasMany(Estacion::class, 'estacion_id');
+        return $this->hasMany(Estacion::class, 'laboratorio_id');
     }
 
     public function horarios()
