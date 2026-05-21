@@ -1,4 +1,6 @@
 import MainLayout from "@/layouts/MainLayout.vue";
+import CarreraList from "@/views/carreras/CarreraList.vue";
+import CursoList from "@/views/cursos/CursoList.vue";
 import Dashboard from "@/views/dashboard/Dashboard.vue";
 import LaboratorioList from "@/views/laboratorios/LaboratorioList.vue";
 import RoleList from "@/views/roles/RoleList.vue";
@@ -57,6 +59,18 @@ export const routes: Array<RouteRecordRaw> = [
                 name: 'Laboratorios',
                 component: LaboratorioList,
                 meta: { title: 'Gestion de Laboratorios' },
+            },
+            {
+                path: '/carreras',
+                name: 'Carreras',
+                component: CarreraList,
+                meta: { title: 'Gestion de carreras' },
+            },
+            {
+                path: '/cursos',
+                name: 'Cursos',
+                component: CursoList,
+                meta: { title: 'Gestion de cursos' },
             }
         ]
     }
