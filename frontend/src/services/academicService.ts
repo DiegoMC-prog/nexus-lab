@@ -1,7 +1,10 @@
 import api from "@/services/api";
 import type { Curso, CursoFormData, CursoResponse, GetCursosResponse, MessageResponse } from "../types/curso";
 import type { PaginatedResponse } from "@/types/api";
-import { type GetSemestresResponse, type Semestre, type SemestreFormData, type SemestreResponse } from "@/types/Semestre";
+import { type GetSemestresResponse, type Semestre, type SemestreFormData, type SemestreResponse, type SemestreFormResponse } from "@/types/Semestre";
+
+
+
 
 export const cursoService = {
     async getCursos(params?: { search?: string; carrera_id?: number | string; semestre_academico_id?: number | string; page?: number }): Promise<PaginatedResponse<Curso>> {
@@ -42,8 +45,13 @@ export const semestreService = {
         return response.data;
     },
 
-    async eliminarSemestre(id: number | string): Promise<MessageResponse> { 
+    async eliminarSemestre(id: number | string): Promise<MessageResponse> {
         const response = await api.delete<MessageResponse>(`/semestres/${id}`);
+        return response.data;
+    },
+
+    async getFormData(): Promise<SemestreFormResponse> {
+        const response = await api.get<SemestreFormResponse>('/semestres/form');
         return response.data;
     }
 }

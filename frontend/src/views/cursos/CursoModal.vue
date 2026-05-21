@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import { X, Loader2, BookOpen } from '@lucide/vue';
-import { carreraService } from '@/services/carreraService';
 import { semestreService } from '@/services/academicService';
-// import type { Curso, CursoFormData, Semestre } from '@/types/academic';
 import type { Curso, CursoFormData } from '@/types/curso';
 import type { Semestre } from '@/types/Semestre';
 import type { Carrera } from '@/types/carrera';
@@ -34,14 +32,10 @@ const formData = ref<CursoFormData>({
 const loadDropdownOptions = async () => {
     try {
         isLoadingOptions.value = true;
-        // Consultamos todas las carreras activas (puedes ajustar los parámetros según tu paginación)
-        const resCarreras = await carreraService.getCarreras({ page: '1' });
-        carrerasOptions.value = resCarreras.data;
-
-        // Consultamos el catálogo de semestres base
-        const resSemestres = await semestreService.getSemestres();
-        // Soportamos si viene paginado o array directo
-        semestresOptions.value = Array.isArray(resSemestres) ? resSemestres : (resSemestres as any).data || [];
+        // Consultamos el catálogo unificado de carreras y semestres desde el backend
+        const res = await semestreService.getFormData();
+        carrerasOptions.value = res.carreras || [];
+        semestresOptions.value = res.semestres || [];
     } catch (error) {
         console.error('Error al cargar opciones del formulario de cursos:', error);
     } finally {

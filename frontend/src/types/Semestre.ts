@@ -1,11 +1,8 @@
 import type { PaginatedResponse } from "./api";
+import type { Carrera } from "./carrera";
 
 export interface Semestre {
     id: number;
-    nombre: string;
-}
-
-export interface SemestreFormData {
     nombre: string;
 }
 
@@ -18,6 +15,22 @@ export interface SemestreResponse {
     semestre_academico: Semestre;
 }
 
-export interface  MessageResponse {
+export interface MessageResponse {
     message: string;
 }
+
+export interface CarreraFormData {
+    id: number | string;
+    nombre: string;
+}
+
+export interface SemestreFormData {
+    id?: number | string;
+    nombre: string;
+}
+
+export interface SemestreFormResponse {
+    carreras: Carrera[];
+    semestres: Semestre[];
+}
+

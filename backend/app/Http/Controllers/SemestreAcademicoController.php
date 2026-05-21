@@ -89,10 +89,33 @@ class SemestreAcademicoController extends Controller
      */
     public function destroy(SemestreAcademico $semestre)
     {
-        $semestre->delete();
+        $semestre->delete(null);
 
         return response()->json([
             'message' => 'Semestre eliminado exitosamente',
+        ]);
+    }
+
+    public function getFormData()
+    {
+        $carreras = \App\Models\Carrera::orderBy('nombre', 'asc')
+            ->get()
+            ->map(fn($carrera) => [
+                'id' => $carrera->id,
+                'nombre' => $carrera->nombre,
+                'codigo' => $carrera->codigo,
+            ]);
+
+        $semestres = \App\Models\SemestreAcademico::orderBy('nombre', 'asc')
+            ->get()
+            ->map(fn($semestre) => [
+                'id' => $semestre->id,
+                'nombre' => $semestre->nombre,
+            ]);
+
+        return response()->json([
+            'carreras' => $carreras,
+            'semestres' => $semestres,
         ]);
     }
 }

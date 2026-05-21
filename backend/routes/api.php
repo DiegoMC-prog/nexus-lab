@@ -43,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('carreras', CarreraController::class);
 
     //modulo semestres
+    Route::get('semestres/form', [SemestreAcademicoController::class, 'getFormData']);
     Route::apiResource('semestres', SemestreAcademicoController::class);
 
     //modulo gestion de cursos

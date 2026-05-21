@@ -138,4 +138,16 @@ class CursoController extends Controller
             'message' => 'Curso eliminado con éxito.'
         ]);
     }
+
+    public function getFormData()
+    {
+
+        $carreras = \App\Models\Carrera::orderBy('nombre', 'asc')->get();
+        $semestres = \App\Models\SemestreAcademico::orderBy('nombre', 'asc')->get();
+
+        return response()->json([
+            'carreras' => $carreras,
+            'semestres' => $semestres,
+        ]);
+    }
 }
