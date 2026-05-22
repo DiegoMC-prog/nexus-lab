@@ -27,6 +27,7 @@ const navItems = [
     { to: '/carreras', label: 'Carreras', icon: Shield, roles: ['admin'] },
     { to: '/semestres', label: 'Semestres', icon: Shield, roles: ['admin'] },
     { to: '/materias', label: 'Materias', icon: Shield, roles: ['admin'] },
+    { to: '/grupos', label: 'Grupos', icon: Users, roles: ['admin'] },
     { to: '/settings', label: 'Configuración', icon: Settings, roles: ['admin', 'supervisor'] }
 ];
 

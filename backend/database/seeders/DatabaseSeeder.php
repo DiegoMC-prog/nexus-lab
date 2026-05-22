@@ -21,30 +21,24 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolSeeder::class,
             SemestreSeeder::class,
+            CarreraSeeder::class,
+            UserSeeder::class,
+            MateriaSeeder::class,
+            GrupoSeeder::class,
+            GrupoUserSeeder::class,
+            LaboratorioSeeder::class,
+            HorarioSeeder::class,
+            EstacionSeeder::class,
+            PerfilHardwareSeeder::class,
+            BiometriaVocalSeeder::class,
+            LogsTelemetriaSeeder::class,
+            ConfigAlertaSeeder::class,
+            AlertaSeeder::class,
+            ComandoSeeder::class,
+            LogsComandoSeeder::class,
+            // DispositivoConocidoSeeder::class,
+            // BiometriaFacialSeeder::class,
+            PerfilSeeder::class,
         ]);
-
-        $user = User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => Hash::make('password'),
-        ]);
-
-        $user->assignRole('admin');
-
-        $user = User::factory()->create([
-            'name' => 'docente',
-            'email' => 'docente@gmail.com',
-            'password' => Hash::make('docente123'),
-        ]);
-
-        $user->assignRole('docente');
-
-        $user = User::factory()->create([
-            'name' => 'estudiante',
-            'email' => 'estudiante@gmail.com',
-            'password' => Hash::make('estudiante123'),
-        ]);
-
-        $user->assignRole('estudiante');
     }
 }

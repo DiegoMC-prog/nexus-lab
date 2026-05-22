@@ -25,9 +25,4 @@ class Materia extends Model
     {
         return $this->hasMany(Grupo::class, 'materia_id');
     }
-
-    public function horarios()
-    {
-        return $this->hasMany(Horario::class, 'materia_id');
-    }
 }

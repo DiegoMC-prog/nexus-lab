@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable('laboratorio_id', 'docente_id', 'materia_id', 'grupo_id', 'dia_semana', 'hora_inicio', 'hora_fin', 'fecha_inicio', 'fecha_fin')]
+#[Fillable('laboratorio_id', 'docente_id', 'grupo_id', 'dia_semana', 'hora_inicio', 'hora_fin', 'fecha_inicio', 'fecha_fin')]
 class Horario extends Model
 {
     use SoftDeletes;
@@ -19,11 +19,6 @@ class Horario extends Model
     public function docente()
     {
         return $this->belongsTo(User::class, 'docente_id')->role('docente');
-    }
-
-    public function materia()
-    {
-        return $this->belongsTo(Materia::class, 'materia_id');
     }
 
     public function grupo()

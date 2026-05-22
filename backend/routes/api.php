@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarreraController;
 use App\Http\Controllers\CursoController;
+use App\Http\Controllers\GrupoController;
 use App\Http\Controllers\LaboratorioController;
 use App\Http\Controllers\MateriaController;
 use App\Http\Controllers\PasswordResetController;
@@ -49,6 +50,10 @@ Route::middleware('auth:sanctum')->group(function () {
     //modulo materia
     Route::get('/materias/form-data', [MateriaController::class, 'MateriaFormData']);
     Route::apiResource('materias', MateriaController::class);
+
+    //modulo grupos
+    Route::get('/grupos/form-data', [GrupoController::class, 'GrupoFormData']);
+    Route::apiResource('grupos', GrupoController::class);
 
     //modulo gestion de laboratorios
     Route::apiResource('laboratorios', LaboratorioController::class);

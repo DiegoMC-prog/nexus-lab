@@ -15,10 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('laboratorio_id')->constrained('laboratorios')->onDelete('cascade');
             $table->foreignId('docente_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('materia_id')->constrained('materias')->onDelete('restrict');
-            // ➕ ADICIÓN: Campo indispensable para paralelos de una misma materia
             $table->foreignId('grupo_id')->constrained('grupos')->onDelete('restrict');
-            // Lógica de Recurrencia Semestral (Adiós a la fecha fija de "cita")
             $table->integer('dia_semana'); // ISO-8601: 1 = Lunes, 2 = Martes, ..., 7 = Domingo
             $table->time('hora_inicio');
             $table->time('hora_fin');

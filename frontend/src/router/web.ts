@@ -3,6 +3,7 @@ import CarreraList from "@/views/carreras/CarreraList.vue";
 import Dashboard from "@/views/dashboard/Dashboard.vue";
 import LaboratorioList from "@/views/laboratorios/LaboratorioList.vue";
 import MateriasList from "@/views/materias/MateriasList.vue";
+import GruposList from "@/views/grupos/GruposList.vue";
 import RoleList from "@/views/roles/RoleList.vue";
 import SemestreList from "@/views/semestres/SemestreList.vue";
 import UserList from "@/views/users/UserList.vue";
@@ -78,6 +79,12 @@ export const routes: Array<RouteRecordRaw> = [
                 name: 'Materias',
                 component: MateriasList,
                 meta: { title: 'Gestion de Materias' }
+            },
+            {
+                path: '/grupos',
+                name: 'Grupos',
+                component: GruposList,
+                meta: { title: 'Gestion de Grupos' }
             },
 
         ]
