@@ -52,6 +52,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('materias', MateriaController::class);
 
     //modulo grupos
+    Route::get('/grupos/estudiantes/search', [GrupoController::class, 'searchEstudiante']);
+    Route::get('/grupos/{grupo}/estudiantes', [GrupoController::class, 'listarEstudiantes']);
+    Route::put('grupos/{grupo}/estudiantes', [GrupoController::class, 'actualizarEstudiantesGrupo']);
     Route::get('/grupos/form-data', [GrupoController::class, 'GrupoFormData']);
     Route::apiResource('grupos', GrupoController::class);
 

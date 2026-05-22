@@ -158,6 +158,92 @@ class GrupoController extends Controller
         ], 200);
     }
 
+    public function listarEstudiantes(Grupo $grupo)
+    {
+        $estudiantes = $grupo->estudiantes()
+            ->select('users.id', 'users.name', 'users.email')
+            ->get()
+            ->makeHidden([
+                'pivot',
+                'roles',
+                'permissions',
+                'permisos',
+                'role',
+            ]);
+
+        return response()->json([
+            'grupo' => [
+                'id' => $grupo->id,
+                'nombre' => $grupo->nombre,
+            ],
+            'estudiantes' => $estudiantes,
+        ]);
+    }
+
+    public function actualizarEstudiantesGrupo(Request $request, Grupo $grupo)
+    {
+        $request->validate([
+            'users_id' => 'required|array',
+            'users_id.*' => 'integer|exists:users,id',
+        ]);
+
+        $estudiantes = $request->users_id;
+
+        // Validar límite de cupo máximo
+        if ($grupo->cupo_maximo && $grupo->cupo_maximo > 0 && count($estudiantes) > $grupo->cupo_maximo) {
+            return response()->json([
+                'message' => 'No se puede guardar: El número de estudiantes (' . count($estudiantes) . ') supera el cupo máximo permitido para este grupo (' . $grupo->cupo_maximo . ').'
+            ], 422);
+        }
+
+        $grupo->estudiantes()->sync($estudiantes);
+
+        // Opcional: recargar relación actualizada
+        $grupo->load('estudiantes');
+
+        $estudiantes = $grupo->estudiantes()
+            ->select('users.id', 'users.name', 'users.email')
+            ->get()
+            ->makeHidden([
+                'pivot',
+                'roles',
+                'permissions',
+                'permisos',
+                'role',
+            ]);
+
+        return response()->json([
+            'message' => 'Estudiantes del grupo actualizados correctamente',
+            'grupo' => [
+                'id' => $grupo->id,
+                'nombre' => $grupo->nombre,
+            ],
+            'estudiantes' => $estudiantes
+        ]);
+    }
+
+    public function searchEstudiante(Request $request)
+    {
+        $q = $request->search;
+
+        $estudiantes = \App\Models\User::query()
+            ->role('estudiante')
+            ->where('name', 'ILIKE', "%{$q}%")
+            ->select('id', 'name', 'email')
+            ->limit(10)
+            ->get()
+            ->makeHidden([
+                'roles',
+                'permissions',
+                'role',
+                'permisos',
+            ]);
+
+        return response()->json([
+            'estudiantes' => $estudiantes,
+        ]);
+    }
+
     public function GrupoFormData()
     {
         $materias = \App\Models\Materia::select(['id', 'nombre'])->latest('id')->get();

@@ -19,7 +19,7 @@ class Grupo extends Model
     // Un grupo contiene a muchos usuarios estudiantes
     public function estudiantes()
     {
-        return $this->belongsToMany(User::class, 'grupo_user');
+        return $this->belongsToMany(User::class, 'grupo_user')->withTimestamps();
     }
 
     public function horarios()

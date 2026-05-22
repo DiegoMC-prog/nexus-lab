@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
-import { Search, Plus, Edit, Trash2, Users, Loader2, Filter } from '@lucide/vue';
+import { Search, Plus, Edit, Trash2, Users, Loader2, Filter, GraduationCap } from '@lucide/vue';
 import { grupoService } from '@/services/grupoService';
 import type { Grupo, GrupoFormData } from '@/types/grupo';
 
@@ -8,6 +8,7 @@ import type { Grupo, GrupoFormData } from '@/types/grupo';
 import BasePagination from '@/components/BasePagination.vue';
 import GrupoModal from './GrupoModal.vue';
 import GrupoDeleteModal from './GrupoDeleteModal.vue';
+import GrupoEstudiantesModal from './GrupoEstudiantesModal.vue';
 
 // Catálogos cargados de form-data
 const materiasOptions = ref<{ id: number; nombre: string; }[]>([]);
@@ -27,7 +28,9 @@ const totalGrupos = ref(0);
 // Estados de Control de Modales
 const isFormModalOpen = ref(false);
 const isDeleteModalOpen = ref(false);
+const isEstudiantesModalOpen = ref(false);
 const selectedGrupo = ref<Grupo | null>(null);
+const selectedGrupoForEstudiantes = ref<Grupo | null>(null);
 
 // Carga los catálogos necesarios para los filtros y el formulario
 const loadFormCatalogs = async () => {
@@ -96,6 +99,11 @@ const openEditModal = (grupo: Grupo) => {
 const openDeleteModal = (grupo: Grupo) => {
     selectedGrupo.value = grupo;
     isDeleteModalOpen.value = true;
+};
+
+const openEstudiantesModal = (grupo: Grupo) => {
+    selectedGrupoForEstudiantes.value = grupo;
+    isEstudiantesModalOpen.value = true;
 };
 
 // Controladores de eventos del CRUD
@@ -234,6 +242,11 @@ onMounted(async () => {
                                 {{ grupo.cupo_maximo > 0 ? `${grupo.cupo_maximo} alumnos` : 'Sin límite' }}
                             </td>
                             <td class="px-6 py-4 text-right space-x-1">
+                                <button @click="openEstudiantesModal(grupo)"
+                                    class="inline-flex items-center justify-center p-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
+                                    title="Gestionar Estudiantes">
+                                    <GraduationCap class="w-4 h-4" />
+                                </button>
                                 <button @click="openEditModal(grupo)"
                                     class="inline-flex items-center justify-center p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
                                     title="Editar Grupo">
@@ -260,6 +273,8 @@ onMounted(async () => {
 
         <GrupoDeleteModal v-model="isDeleteModalOpen" :grupo="selectedGrupo" :is-saving="isSaving"
             @confirm="handleConfirmDelete" />
+
+        <GrupoEstudiantesModal v-model="isEstudiantesModalOpen" :grupo="selectedGrupoForEstudiantes" />
     </div>
 </template>
 

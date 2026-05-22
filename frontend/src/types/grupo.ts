@@ -55,3 +55,31 @@ export interface GrupoResponse {
 export interface MessageResponse {
     message: string;
 }
+
+export interface GrupoEstudiante {
+    id: number;
+    name: string;
+    email: string;
+}
+
+export interface ListarEstudiantesResponse {
+    grupo: {
+        id: number;
+        nombre: string;
+    };
+    estudiantes: GrupoEstudiante[];
+}
+
+export interface ActualizarEstudiantesGrupoResponse {
+    message: string;
+    grupo: {
+        id: number;
+        nombre: string;
+    };
+    estudiantes: GrupoEstudiante[];
+}
+
+export interface SearchEstudianteResponse {
+    estudiantes: GrupoEstudiante[];
+}
+

@@ -56,5 +56,11 @@ class UserSeeder extends Seeder
             ]);
             $estudiante->assignRole('estudiante');
         }
+
+        $users = User::factory(100)->create();
+
+        foreach ($users as $user) {
+            $user->assignRole('estudiante');
+        }
     }
 }

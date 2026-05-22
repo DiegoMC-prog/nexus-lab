@@ -1,6 +1,6 @@
 import type { PaginatedResponse } from "@/types/api";
 import api from "./api";
-import type { GetGruposResponse, Grupo, GrupoFormData, GrupoResponse, GrupoFormDataResponse, MessageResponse } from '@/types/grupo';
+import type { GetGruposResponse, Grupo, GrupoFormData, GrupoResponse, GrupoFormDataResponse, MessageResponse, ListarEstudiantesResponse, ActualizarEstudiantesGrupoResponse, SearchEstudianteResponse } from '@/types/grupo';
 
 export const grupoService = {
     async getGrupos(params?: { search?: string; page?: string; materia_id?: string }): Promise<PaginatedResponse<Grupo>> {
@@ -25,6 +25,21 @@ export const grupoService = {
 
     async eliminarGrupo(id: number | string): Promise<MessageResponse> {
         const response = await api.delete<MessageResponse>(`/grupos/${id}`);
+        return response.data;
+    },
+
+    async listarEstudiantes(grupoId: number | string): Promise<ListarEstudiantesResponse> {
+        const response = await api.get<ListarEstudiantesResponse>(`/grupos/${grupoId}/estudiantes`);
+        return response.data;
+    },
+
+    async actualizarEstudiantesGrupo(grupoId: number | string, usersId: number[]): Promise<ActualizarEstudiantesGrupoResponse> {
+        const response = await api.put<ActualizarEstudiantesGrupoResponse>(`/grupos/${grupoId}/estudiantes`, { users_id: usersId });
+        return response.data;
+    },
+
+    async searchEstudiante(search: string): Promise<SearchEstudianteResponse> {
+        const response = await api.get<SearchEstudianteResponse>('/grupos/estudiantes/search', { params: { search } });
         return response.data;
     }
 }
