@@ -14,13 +14,23 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::query()->with('permissions:id,name')->get(['id', 'name'])->map(function ($role) {
-            return [
-                'id'          => $role->id,
-                'name'        => $role->name,
-                'permissions' => $role->permissions->pluck('name'),
-            ];
-        });
+        $roles = Role::query()
+            ->select(['id', 'name'])
+            ->addSelect(['users_count' => function ($query) {
+                $query->selectRaw('count(*)')
+                    ->from(config('permission.table_names.model_has_roles'))
+                    ->whereColumn(config('permission.column_names.role_pivot_key') ?: 'role_id', 'roles.id');
+            }])
+            ->with('permissions:id,name')
+            ->get()
+            ->map(function ($role) {
+                return [
+                    'id'          => $role->id,
+                    'name'        => $role->name,
+                    'permissions' => $role->permissions->pluck('name'),
+                    'users_count' => (int) $role->users_count,
+                ];
+            });
 
         return response()->json([
             "roles" => $roles,

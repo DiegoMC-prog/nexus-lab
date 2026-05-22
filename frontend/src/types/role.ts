@@ -19,6 +19,7 @@ export interface ApiRole {
     id: number;
     name: string;
     permissions: string[];
+    users_count?: number;
 }
 
 export interface ApiRolesResponse {

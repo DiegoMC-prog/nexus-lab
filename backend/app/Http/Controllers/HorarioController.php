@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Horario\StoreHorarioRequest;
+use App\Http\Requests\Horario\UpdateHorarioRequest;
 use App\Models\Horario;
 use Illuminate\Http\Request;
 
@@ -10,17 +12,94 @@ class HorarioController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Horario::query()->with(['laboratorio', 'docente', 'grupo']);
+
+        // 1. Lógica de seguridad: Si el usuario es docente, forzar su filtro
+        if (request()->user()->hasRole('docente')) {
+            $query->where('docente_id', request()->user()->id);
+        } else {
+            // 2. Filtro de Docente con validación de rol (solo para Admins)
+            $query->when($request->filled('docente_id') && $request->docente_id !== 'all', function ($q) use ($request) {
+                $q->where('docente_id', $request->docente_id)
+                    ->whereHas('docente', function ($sub) {
+                        $sub->role('docente');
+                    });
+            });
+        }
+
+        // 3. Filtros estándar
+        $query->when($request->filled('laboratorio_id') && $request->laboratorio_id !== 'all', function ($q) use ($request) {
+            $q->where('laboratorio_id', $request->laboratorio_id);
+        });
+
+        $query->when($request->filled('grupo_id') && $request->grupo_id !== 'all', function ($q) use ($request) {
+            $q->where('grupo_id', $request->grupo_id);
+        });
+
+        // Filtro de fechas mejorado con whereBetween
+        $query->when($request->filled('fecha_inicio') && $request->filled('fecha_fin'), function ($q) use ($request) {
+            $q->whereBetween('fecha_inicio', [$request->fecha_inicio, $request->fecha_fin]);
+        });
+
+        $horarios = $query->latest()->paginate(10);
+
+        // 4. Transformación segura (usando operador nullsafe ?)
+        $horarios->through(function ($horario) {
+            return [
+                'id' => $horario->id,
+                'laboratorio_id' => $horario->laboratorio_id,
+                'nombre_laboratorio' => $horario->laboratorio?->nombre ?? 'Sin asignar',
+                'docente_id' => $horario->docente_id,
+                'nombre_docente' => $horario->docente?->name ?? 'Sin asignar',
+                'dia_semana' => $horario->dia_semana,
+                'dia_sema' => $horario->dia_semana,
+                'hora_inicio' => $horario->hora_inicio,
+                'hora_fin' => $horario->hora_fin,
+                'fecha_inicio' => $horario->fecha_inicio,
+                'fecha_fin' => $horario->fecha_fin,
+            ];
+        });
+
+        return response()->json([
+            'horarios' => $horarios,
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreHorarioRequest $request)
     {
-        //
+        $data = (object) $request->validated();
+
+        $horario = Horario::create([
+            'laboratorio_id' => $data->laboratorio_id,
+            'docente_id' => $data->docente_id,
+            'grupo_id' => $data->grupo_id,
+            'dia_semana' => $data->dia_semana,
+            'hora_inicio' => $data->hora_inicio,
+            'hora_fin' => $data->hora_fin,
+            'fecha_inicio' => $data->fecha_inicio,
+            'fecha_fin' => $data->fecha_fin,
+        ]);
+
+        return response()->json([
+            'message' => 'Horario creado correctamente',
+            'horario' => [
+                'id' => $horario->id,
+                'laboratorio_id' => $horario->laboratorio_id,
+                'nombre_laboratorio' => $horario->laboratorio?->nombre ?? 'Sin asignar',
+                'docente_id' => $horario->docente_id,
+                'nombre_docente' => $horario->docente?->name ?? 'Sin asignar',
+                'dia_semana' => $horario->dia_semana,
+                'hora_inicio' => $horario->hora_inicio,
+                'hora_fin' => $horario->hora_fin,
+                'fecha_inicio' => $horario->fecha_inicio,
+                'fecha_fin' => $horario->fecha_fin,
+            ],
+        ]);
     }
 
     /**
@@ -28,15 +107,57 @@ class HorarioController extends Controller
      */
     public function show(Horario $horario)
     {
-        //
+        $horario->load(['laboratorio', 'docente', 'grupo']);
+
+        return response()->json([
+            'horario' => [
+                'id' => $horario->id,
+                'laboratorio_id' => $horario->laboratorio_id,
+                'nombre_laboratorio' => $horario->laboratorio?->nombre ?? 'Sin asignar',
+                'docente_id' => $horario->docente_id,
+                'nombre_docente' => $horario->docente?->name ?? 'Sin asignar',
+                'dia_semana' => $horario->dia_semana,
+                'hora_inicio' => $horario->hora_inicio,
+                'hora_fin' => $horario->hora_fin,
+                'fecha_inicio' => $horario->fecha_inicio,
+                'fecha_fin' => $horario->fecha_fin,
+            ],
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Horario $horario)
+    public function update(UpdateHorarioRequest $request, Horario $horario)
     {
-        //
+        $data = (object) $request->validated();
+
+        $horario->update([
+            'laboratorio_id' => $data->laboratorio_id,
+            'docente_id' => $data->docente_id,
+            'grupo_id' => $data->grupo_id,
+            'dia_semana' => $data->dia_semana,
+            'hora_inicio' => $data->hora_inicio,
+            'hora_fin' => $data->hora_fin,
+            'fecha_inicio' => $data->fecha_inicio,
+            'fecha_fin' => $data->fecha_fin,
+        ]);
+
+        return response()->json([
+            'message' => 'Horario actualizado correctamente',
+            'horario' => [
+                'id' => $horario->id,
+                'laboratorio_id' => $horario->laboratorio_id,
+                'nombre_laboratorio' => $horario->laboratorio?->nombre ?? 'Sin asignar',
+                'docente_id' => $horario->docente_id,
+                'nombre_docente' => $horario->docente?->name ?? 'Sin asignar',
+                'dia_semana' => $horario->dia_semana,
+                'hora_inicio' => $horario->hora_inicio,
+                'hora_fin' => $horario->hora_fin,
+                'fecha_inicio' => $horario->fecha_inicio,
+                'fecha_fin' => $horario->fecha_fin,
+            ],
+        ]);
     }
 
     /**
@@ -44,6 +165,35 @@ class HorarioController extends Controller
      */
     public function destroy(Horario $horario)
     {
-        //
+        $horario->delete(null);
+
+        return response()->json([
+            'message' => 'Horario eliminado correctamente',
+        ]);
+    }
+
+    public function horarioFormData()
+    {
+        $laboratorios = \App\Models\Laboratorio::query()
+            ->select(['id', 'nombre'])
+            ->latest()
+            ->get();
+
+        $docentes = \App\Models\User::query()
+            ->role('docente')
+            ->select(['id', 'name as nombre'])
+            ->latest()
+            ->get();
+
+        $grupos = \App\Models\Grupo::query()
+            ->select(['id', 'nombre'])
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'laboratorios' => $laboratorios,
+            'docentes' => $docentes,
+            'grupos' => $grupos,
+        ]);
     }
 }

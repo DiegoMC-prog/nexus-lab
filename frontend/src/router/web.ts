@@ -7,6 +7,7 @@ import GruposList from "@/views/grupos/GruposList.vue";
 import RoleList from "@/views/roles/RoleList.vue";
 import SemestreList from "@/views/semestres/SemestreList.vue";
 import UserList from "@/views/users/UserList.vue";
+import HorariosList from "@/views/horarios/HorariosList.vue";
 import type { RouteRecordRaw } from "vue-router";
 
 export const routes: Array<RouteRecordRaw> = [
@@ -85,6 +86,12 @@ export const routes: Array<RouteRecordRaw> = [
                 name: 'Grupos',
                 component: GruposList,
                 meta: { title: 'Gestion de Grupos' }
+            },
+            {
+                path: '/horarios',
+                name: 'Horarios',
+                component: HorariosList,
+                meta: { title: 'Gestion de Horarios' }
             },
 
         ]

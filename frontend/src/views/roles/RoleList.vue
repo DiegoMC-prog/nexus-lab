@@ -69,7 +69,8 @@ const rolesList = computed<Role[]>(() => {
         const ui = roleUiConfig[role.name] || { displayName: role.name, description: 'Rol del sistema.', color: '#6b7280', userCount: 0 };
         return {
             id: String(role.id), name: role.name, displayName: ui.displayName,
-            description: ui.description, color: ui.color, userCount: ui.userCount,
+            description: ui.description, color: ui.color,
+            userCount: role.users_count !== undefined ? role.users_count : ui.userCount,
             permissions: role.permissions
         };
     });
