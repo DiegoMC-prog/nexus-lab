@@ -18,7 +18,7 @@ class Horario extends Model
 
     public function docente()
     {
-        return $this->belongsTo(User::class, 'docente_id')->role('docente');
+        return $this->belongsTo(User::class, 'docente_id');
     }
 
     public function grupo()
