@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { X, Calendar, Loader2 } from '@lucide/vue';
-import type { Semestre, SemestreFormData } from '@/types/Semestre';
+import type { Semestre, SemestreFormData } from '@/types/semestre';
 
 const props = defineProps<{
     modelValue: boolean;

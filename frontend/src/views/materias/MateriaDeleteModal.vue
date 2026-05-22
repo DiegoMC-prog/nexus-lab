@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { AlertTriangle, Loader2 } from '@lucide/vue'
-import type { Semestre } from '@/types/semestre';
+import type { Materia } from '@/types/materia';
 
 const props = defineProps<{
   modelValue: boolean;
-  semestre: Semestre | null;
+  materia: Materia | null;
   isSaving: boolean;
 }>();
 
@@ -37,14 +37,15 @@ const confirmDelete = () => {
             <AlertTriangle class="w-5 h-5 text-red-600" />
           </div>
           <div class="space-y-2">
-            <h3 class="text-lg font-bold text-gray-900">¿Eliminar Semestre Académico?</h3>
+            <h3 class="text-lg font-bold text-gray-900">¿Eliminar Materia?</h3>
             <p class="text-sm text-gray-500">
-              ¿Estás seguro de que deseas eliminar permanentemente este semestre académico del sistema? Esta acción no se puede deshacer.
+              ¿Estás seguro de que deseas eliminar permanentemente esta materia del catálogo universitario? Esta acción no se puede deshacer y puede afectar los horarios y paralelos asignados.
             </p>
             
-            <div v-if="semestre" class="bg-gray-50 p-3 rounded-lg border border-gray-200 text-xs font-medium space-y-1">
-              <div class="text-gray-950 font-bold text-sm">{{ semestre.nombre }}</div>
-              <div class="text-gray-500">ID del Registro: {{ semestre.id }}</div>
+            <div v-if="materia" class="bg-gray-50 p-3 rounded-lg border border-gray-200 text-xs font-medium space-y-1">
+              <div class="text-gray-950 font-bold text-sm">{{ materia.nombre }}</div>
+              <div class="text-gray-500 font-mono">Código: {{ materia.codigo }}</div>
+              <div v-if="materia.nombre_carrera" class="text-gray-500">Carrera: {{ materia.nombre_carrera }}</div>
             </div>
           </div>
         </div>

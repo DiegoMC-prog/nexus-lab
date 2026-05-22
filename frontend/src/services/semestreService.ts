@@ -1,6 +1,6 @@
 import type { PaginatedResponse } from "@/types/api";
 import api from "./api";
-import type { GetSemestresResponse, Semestre, SemestreFormData, SemestreResponse, MessageResponse } from '@/types/Semestre';
+import type { GetSemestresResponse, Semestre, SemestreFormData, SemestreResponse, MessageResponse } from '@/types/semestre';
 
 export const semestreService = {
     async getSemestres(params?: { search?: string; page?: string }): Promise<PaginatedResponse<Semestre>> {

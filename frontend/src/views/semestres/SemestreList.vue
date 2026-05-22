@@ -2,7 +2,7 @@
 import { ref, watch, onMounted } from 'vue';
 import { Search, Plus, Edit, Trash2, Calendar, Loader2 } from '@lucide/vue';
 import { semestreService } from '@/services/semestreService';
-import type { Semestre, SemestreFormData } from '@/types/Semestre';
+import type { Semestre, SemestreFormData } from '@/types/semestre';
 
 // Componentes del Sistema
 import BasePagination from '@/components/BasePagination.vue';

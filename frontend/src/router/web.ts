@@ -2,6 +2,7 @@ import MainLayout from "@/layouts/MainLayout.vue";
 import CarreraList from "@/views/carreras/CarreraList.vue";
 import Dashboard from "@/views/dashboard/Dashboard.vue";
 import LaboratorioList from "@/views/laboratorios/LaboratorioList.vue";
+import MateriasList from "@/views/materias/MateriasList.vue";
 import RoleList from "@/views/roles/RoleList.vue";
 import SemestreList from "@/views/semestres/SemestreList.vue";
 import UserList from "@/views/users/UserList.vue";
@@ -71,7 +72,14 @@ export const routes: Array<RouteRecordRaw> = [
                 name: 'Semestres',
                 component: SemestreList,
                 meta: { title: 'Gestion de Ciclos Academicos' }
-            }
+            },
+            {
+                path: '/materias',
+                name: 'Materias',
+                component: MateriasList,
+                meta: { title: 'Gestion de Materias' }
+            },
+
         ]
     }
 

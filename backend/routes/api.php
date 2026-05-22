@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarreraController;
 use App\Http\Controllers\CursoController;
 use App\Http\Controllers\LaboratorioController;
+use App\Http\Controllers\MateriaController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SemestreAcademicoController;
@@ -44,6 +45,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //modulo semestres
     Route::apiResource('semestres', SemestreAcademicoController::class);
+
+    //modulo materia
+    Route::get('/materias/form-data', [MateriaController::class, 'MateriaFormData']);
+    Route::apiResource('materias', MateriaController::class);
 
     //modulo gestion de laboratorios
     Route::apiResource('laboratorios', LaboratorioController::class);
