@@ -7,6 +7,7 @@ const props = defineProps<{
     modelValue: boolean;
     semestre: Semestre | null;
     isSaving: boolean;
+    validationErrors?: Record<string, string[]>;
 }>();
 
 const emit = defineEmits<{
@@ -69,7 +70,11 @@ const handleSubmit = () => {
                         </label>
                         <input v-model="formData.nombre" type="text" required placeholder="Ej: 2026-I o 2026-II"
                             :disabled="isSaving"
-                            class="w-full px-3 py-2 bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all" />
+                            class="w-full px-3 py-2 bg-white border text-gray-900 placeholder:text-gray-400 rounded-lg focus:outline-none focus:ring-2 text-sm transition-all"
+                            :class="validationErrors?.nombre ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'" />
+                        <p v-if="validationErrors?.nombre" class="text-xs text-red-500 mt-1 block">
+                            {{ validationErrors.nombre[0] }}
+                        </p>
                     </div>
 
                     <div class="mt-6 pt-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 -mx-6 -mb-6 p-4">

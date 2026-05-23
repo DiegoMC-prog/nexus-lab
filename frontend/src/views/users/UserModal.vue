@@ -8,6 +8,7 @@ const props = defineProps<{
     show: boolean;
     user: User | null;
     loading: boolean;
+    validationErrors?: Record<string, string[]>;
 }>();
 
 const emit = defineEmits<{
@@ -113,7 +114,11 @@ const handleSave = () => {
                         <label class="text-gray-700 text-xs font-semibold uppercase tracking-wider">Nombre
                             Completo</label>
                         <input v-model="formData.name" type="text" placeholder="Ej. Carlos Mendoza" :disabled="loading"
-                            class="w-full px-3.5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-sm transition-all placeholder:text-gray-400 disabled:bg-gray-50 disabled:text-gray-400" />
+                            class="w-full px-3.5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-sm transition-all placeholder:text-gray-400 disabled:bg-gray-50 disabled:text-gray-400"
+                            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500/10': validationErrors?.name }" />
+                        <p v-if="validationErrors?.name" class="text-xs text-red-500 mt-1 block">
+                            {{ validationErrors.name[0] }}
+                        </p>
                     </div>
 
                     <div class="space-y-1.5">
@@ -121,7 +126,11 @@ const handleSave = () => {
                             Electrónico</label>
                         <input v-model="formData.email" type="email" placeholder="nombre@universidad.edu"
                             :disabled="loading"
-                            class="w-full px-3.5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-sm transition-all placeholder:text-gray-400 disabled:bg-gray-50 disabled:text-gray-400" />
+                            class="w-full px-3.5 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-sm transition-all placeholder:text-gray-400 disabled:bg-gray-50 disabled:text-gray-400"
+                            :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500/10': validationErrors?.email }" />
+                        <p v-if="validationErrors?.email" class="text-xs text-red-500 mt-1 block">
+                            {{ validationErrors.email[0] }}
+                        </p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -129,23 +138,31 @@ const handleSave = () => {
                             <label class="text-gray-700 text-xs font-semibold uppercase tracking-wider">Rol
                                 asignado</label>
                             <select v-model="formData.role" :disabled="loading"
-                                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-sm transition-all cursor-pointer capitalize disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed">
+                                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-sm transition-all cursor-pointer capitalize disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500/10': validationErrors?.role }">
                                 <option :value="null" disabled>Seleccione un rol</option>
                                 <option v-for="rol in listaRoles" :key="rol.id" :value="rol.id">
                                     {{ rol.name }}
                                 </option>
                             </select>
+                            <p v-if="validationErrors?.role" class="text-xs text-red-500 mt-1 block">
+                                {{ validationErrors.role[0] }}
+                            </p>
                         </div>
 
                         <div class="space-y-1.5">
                             <label class="text-gray-700 text-xs font-semibold uppercase tracking-wider">Estado de
                                 cuenta</label>
                             <select v-model="formData.estado" :disabled="loading"
-                                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-sm transition-all cursor-pointer disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed">
+                                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-sm transition-all cursor-pointer disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                :class="{ 'border-red-500 focus:border-red-500 focus:ring-red-500/10': validationErrors?.estado }">
                                 <option value="activo">Activo</option>
                                 <option value="inactivo">Inactivo</option>
                                 <option value="bloqueado">Bloqueado</option>
                             </select>
+                            <p v-if="validationErrors?.estado" class="text-xs text-red-500 mt-1 block">
+                                {{ validationErrors.estado[0] }}
+                            </p>
                         </div>
                     </div>
                 </div>

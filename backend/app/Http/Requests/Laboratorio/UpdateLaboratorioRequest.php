@@ -4,6 +4,7 @@ namespace App\Http\Requests\Laboratorio;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Override;
 
 class UpdateLaboratorioRequest extends FormRequest
@@ -24,7 +25,14 @@ class UpdateLaboratorioRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nombre' => 'sometimes|string|max:255',
+            'nombre' => [
+                'sometimes',
+                'string',
+                'max:255',
+                Rule::unique('laboratorios', 'nombre')
+                    ->ignore($this->route('laboratorio'))
+                    ->whereNull('deleted_at'),
+            ],
             'pabellon' => 'sometimes|string|max:255',
             'piso' => 'sometimes|string|max:100',
             'activo' => 'sometimes|boolean',
@@ -35,6 +43,8 @@ class UpdateLaboratorioRequest extends FormRequest
     public function messages()
     {
         return [
+            'nombre.unique' => 'El nombre ya está registrado.',
+
             'activo.boolean' => 'El campo activo debe ser verdadero o falso.',
         ];
     }

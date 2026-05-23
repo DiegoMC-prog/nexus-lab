@@ -11,12 +11,14 @@ import { laboratorioService } from '@/services/laboratorioService';
 import LaboratorioModal from './LaboratorioModal.vue';
 import LaboratorioDeleteModal from './LaboratorioDeleteModal.vue';
 import BasePagination from '@/components/BasePagination.vue';
+import { getLaravelValidationErrors } from '@/utils/errorHandler';
 
 // --- ESTADO REACTIVO DE LA API ---
 const laboratorios = ref<Laboratorio[]>([]);
 const isLoading = ref(true);
 const isSaving = ref(false);
 const isInitializing = ref(true);
+const validationErrors = ref<Record<string, string[]> | undefined>(undefined);
 
 // Filtros (Unificado con tu backend de Laravel)
 const searchTerm = ref('');
@@ -95,11 +97,13 @@ onMounted(async () => {
 // --- ACCIONES Y ORQUESTACIÓN ---
 const openCreateDialog = () => {
     selectedLab.value = null;
+    validationErrors.value = undefined;
     isFormDialogOpen.value = true;
 };
 
 const openEditDialog = (lab: Laboratorio) => {
     selectedLab.value = lab;
+    validationErrors.value = undefined;
     isFormDialogOpen.value = true;
 };
 
@@ -110,6 +114,7 @@ const openDeleteDialog = (lab: Laboratorio) => {
 
 const handleSaveLaboratorio = async (formData: LaboratorioFormData) => {
     isSaving.value = true;
+    validationErrors.value = undefined;
     try {
         if (selectedLab.value?.id) {
             await laboratorioService.actualizarLaboratorio(selectedLab.value.id, formData);
@@ -119,8 +124,11 @@ const handleSaveLaboratorio = async (formData: LaboratorioFormData) => {
         isFormDialogOpen.value = false;
         selectedLab.value = null;
         await fetchLaboratorios();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error al guardar el laboratorio:', error);
+        if (error.response && error.response.status === 422) {
+            validationErrors.value = getLaravelValidationErrors(error);
+        }
     } finally {
         isSaving.value = false;
     }
@@ -255,7 +263,7 @@ const handleDeleteLaboratorio = async () => {
         </div>
 
         <LaboratorioModal :show="isFormDialogOpen" :lab="selectedLab" :loading="isSaving"
-            @close="isFormDialogOpen = false" @submit="handleSaveLaboratorio" />
+            :validation-errors="validationErrors" @close="isFormDialogOpen = false" @submit="handleSaveLaboratorio" />
 
         <LaboratorioDeleteModal :show="isDeleteDialogOpen" :lab="selectedLab" @close="isDeleteDialogOpen = false"
             @confirm="handleDeleteLaboratorio" />

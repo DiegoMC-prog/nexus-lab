@@ -8,12 +8,14 @@ import type { Carrera, CarreraFormData } from '@/types/carrera';
 import BasePagination from '@/components/BasePagination.vue';
 import CarreraModal from './CarreraModal.vue';
 import CarreraDeleteModal from './CarreraDeleteModal.vue';
+import { getLaravelValidationErrors } from '@/utils/errorHandler';
 
 // Estados Reactivos de Datos
 const carreras = ref<Carrera[]>([]);
 const searchTerm = ref('');
 const isLoading = ref(false);
 const isSaving = ref(false);
+const validationErrors = ref<Record<string, string[]> | undefined>(undefined);
 
 // Estados de Paginación
 const currentPage = ref(1);
@@ -61,11 +63,13 @@ watch(currentPage, () => {
 // Control de flujos de apertura de modales
 const openCreateModal = () => {
     selectedCarrera.value = null;
+    validationErrors.value = undefined;
     isFormModalOpen.value = true;
 };
 
 const openEditModal = (carrera: Carrera) => {
     selectedCarrera.value = carrera;
+    validationErrors.value = undefined;
     isFormModalOpen.value = true;
 };
 
@@ -77,6 +81,7 @@ const openDeleteModal = (carrera: Carrera) => {
 // Controladores de eventos del CRUD (Resolución asíncrona segura)
 const handleSaveCarrera = async (formData: CarreraFormData) => {
     isSaving.value = true;
+    validationErrors.value = undefined;
     try {
         if (selectedCarrera.value) {
             await carreraService.actualizarCarrera(selectedCarrera.value.id, formData);
@@ -85,8 +90,11 @@ const handleSaveCarrera = async (formData: CarreraFormData) => {
         }
         isFormModalOpen.value = false; // Solo cierra si finaliza con éxito en la BD
         fetchCarreras();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error al guardar la carrera:', error);
+        if (error.response && error.response.status === 422) {
+            validationErrors.value = getLaravelValidationErrors(error);
+        }
     } finally {
         isSaving.value = false;
     }
@@ -201,7 +209,7 @@ onMounted(() => {
         </div>
 
         <CarreraModal v-model="isFormModalOpen" :carrera="selectedCarrera" :is-saving="isSaving"
-            @save="handleSaveCarrera" />
+            :validation-errors="validationErrors" @save="handleSaveCarrera" />
 
         <CarreraDeleteModal v-model="isDeleteModalOpen" :carrera="selectedCarrera" :is-saving="isSaving"
             @confirm="handleConfirmDelete" />

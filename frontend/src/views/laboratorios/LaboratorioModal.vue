@@ -7,6 +7,7 @@ const props = withDefaults(defineProps<{
     show: boolean;
     lab: Laboratorio | null;
     loading?: boolean;
+    validationErrors?: Record<string, string[]>;
 }>(), {
     loading: false
 });
@@ -81,7 +82,11 @@ const handleSave = () => {
                             Aula</label>
                         <input v-model="formData.nombre" type="text" placeholder="Ej. 202, Laboratorio de Redes"
                             :disabled="loading"
-                            class="w-full px-3.5 py-2 border border-gray-200 rounded-lg focus:outline-hidden focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-2xs transition-all placeholder:text-gray-400 disabled:bg-gray-50 disabled:text-gray-400" />
+                            class="w-full px-3.5 py-2 border border-gray-200 rounded-lg focus:outline-hidden focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-2xs transition-all placeholder:text-gray-400 disabled:bg-gray-50 disabled:text-gray-400"
+                            :class="{ 'border-red-500 focus:ring-red-500': validationErrors?.nombre }" />
+                        <p v-if="validationErrors?.nombre" class="text-xs text-red-500 mt-1 block">
+                            {{ validationErrors.nombre[0] }}
+                        </p>
                     </div>
 
                     <div class="space-y-1.5">
@@ -89,24 +94,36 @@ const handleSave = () => {
                             Bloque</label>
                         <input v-model="formData.pabellon" type="text" placeholder="Ej. Bloque B, Pabellón Norte"
                             :disabled="loading"
-                            class="w-full px-3.5 py-2 border border-gray-200 rounded-lg focus:outline-hidden focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-2xs transition-all placeholder:text-gray-400 disabled:bg-gray-50 disabled:text-gray-400" />
+                            class="w-full px-3.5 py-2 border border-gray-200 rounded-lg focus:outline-hidden focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-2xs transition-all placeholder:text-gray-400 disabled:bg-gray-50 disabled:text-gray-400"
+                            :class="{ 'border-red-500 focus:ring-red-500': validationErrors?.pabellon }" />
+                        <p v-if="validationErrors?.pabellon" class="text-xs text-red-500 mt-1 block">
+                            {{ validationErrors.pabellon[0] }}
+                        </p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="space-y-1.5">
                             <label class="text-gray-700 text-xs font-semibold uppercase tracking-wider">Piso</label>
                             <input v-model="formData.piso" type="text" placeholder="Ej. Piso 3" :disabled="loading"
-                                class="w-full px-3.5 py-2 border border-gray-200 rounded-lg focus:outline-hidden focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-2xs transition-all placeholder:text-gray-400 disabled:bg-gray-50 disabled:text-gray-400" />
+                                class="w-full px-3.5 py-2 border border-gray-200 rounded-lg focus:outline-hidden focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-2xs transition-all placeholder:text-gray-400 disabled:bg-gray-50 disabled:text-gray-400"
+                                :class="{ 'border-red-500 focus:ring-red-500': validationErrors?.piso }" />
+                            <p v-if="validationErrors?.piso" class="text-xs text-red-500 mt-1 block">
+                                {{ validationErrors.piso[0] }}
+                            </p>
                         </div>
 
                         <div class="space-y-1.5">
                             <label class="text-gray-700 text-xs font-semibold uppercase tracking-wider">Estado
                                 Operativo</label>
                             <select v-model="formData.activo" :disabled="loading"
-                                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-hidden focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-2xs transition-all cursor-pointer disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed">
+                                class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-hidden focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-2xs transition-all cursor-pointer disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                :class="{ 'border-red-500 focus:ring-red-500': validationErrors?.activo }">
                                 <option :value="true">Activo / Disponible</option>
                                 <option :value="false">Inactivo / Mantenimiento</option>
                             </select>
+                            <p v-if="validationErrors?.activo" class="text-xs text-red-500 mt-1 block">
+                                {{ validationErrors.activo[0] }}
+                            </p>
                         </div>
                     </div>
                 </div>

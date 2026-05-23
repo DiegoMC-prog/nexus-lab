@@ -8,6 +8,7 @@ import type { Materia, MateriaFormData } from '@/types/materia';
 import BasePagination from '@/components/BasePagination.vue';
 import MateriaModal from './MateriaModal.vue';
 import MateriaDeleteModal from './MateriaDeleteModal.vue';
+import { getLaravelValidationErrors } from '@/utils/errorHandler';
 
 // Catálogos cargados de form-data
 const carreras = ref<{ id: number; nombre: string; }[]>([]);
@@ -20,6 +21,7 @@ const selectedCarreraFilter = ref('all');
 const selectedSemestreFilter = ref('all');
 const isLoading = ref(true);
 const isSaving = ref(false);
+const validationErrors = ref<Record<string, string[]> | undefined>(undefined);
 
 // Estados de Paginación
 const currentPage = ref(1);
@@ -89,11 +91,13 @@ watch(currentPage, () => {
 // Control de flujos de apertura de modales
 const openCreateModal = () => {
     selectedMateria.value = null;
+    validationErrors.value = undefined;
     isFormModalOpen.value = true;
 };
 
 const openEditModal = (materia: Materia) => {
     selectedMateria.value = materia;
+    validationErrors.value = undefined;
     isFormModalOpen.value = true;
 };
 
@@ -105,6 +109,7 @@ const openDeleteModal = (materia: Materia) => {
 // Controladores de eventos del CRUD
 const handleSaveMateria = async (formData: MateriaFormData) => {
     isSaving.value = true;
+    validationErrors.value = undefined;
     try {
         if (selectedMateria.value) {
             await materiaService.actualizarMateria(selectedMateria.value.id, formData);
@@ -113,8 +118,11 @@ const handleSaveMateria = async (formData: MateriaFormData) => {
         }
         isFormModalOpen.value = false; // Solo cierra si finaliza con éxito en la BD
         fetchMaterias();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error al guardar la materia:', error);
+        if (error.response && error.response.status === 422) {
+            validationErrors.value = getLaravelValidationErrors(error);
+        }
     } finally {
         isSaving.value = false;
     }
@@ -280,7 +288,7 @@ onMounted(async () => {
         </div>
 
         <MateriaModal v-model="isFormModalOpen" :materia="selectedMateria" :is-saving="isSaving" :carreras="carreras"
-            :semestres="semestres" @save="handleSaveMateria" />
+            :semestres="semestres" :validation-errors="validationErrors" @save="handleSaveMateria" />
 
         <MateriaDeleteModal v-model="isDeleteModalOpen" :materia="selectedMateria" :is-saving="isSaving"
             @confirm="handleConfirmDelete" />

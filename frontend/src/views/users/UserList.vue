@@ -12,6 +12,7 @@ import UserModal from './UserModal.vue';
 import UserDeleteModal from './UserDeleteModal.vue';
 import BasePagination from '@/components/BasePagination.vue';
 import { useAuthStore } from '@/stores/auth';
+import { getLaravelValidationErrors } from '@/utils/errorHandler';
 
 // Configuración visual para Roles
 const rolesConfig: Record<string, { displayName: string; color: string }> = {
@@ -28,6 +29,9 @@ const isSaving = ref(false);
 const authStore = useAuthStore();
 
 const isInitializing = ref(true);
+
+// Errores de validación del backend
+const validationErrors = ref<Record<string, string[]> | undefined>(undefined);
 
 // Filtros
 const searchTerm = ref('');
@@ -106,11 +110,13 @@ onMounted(async () => {
 // --- ACCIONES Y ORQUESTACIÓN ---
 const openCreateDialog = () => {
     selectedUser.value = null;
+    validationErrors.value = undefined;
     isFormDialogOpen.value = true;
 };
 
 const openEditDialog = (user: User) => {
     selectedUser.value = user;
+    validationErrors.value = undefined;
     isFormDialogOpen.value = true;
 };
 
@@ -121,6 +127,7 @@ const openDeleteDialog = (user: User) => {
 
 const handleSaveUser = async (formData: any) => {
     isSaving.value = true;
+    validationErrors.value = undefined;
     try {
         if (selectedUser.value?.id) {
             // Edición: Enviamos el ID y los nuevos datos (el rol viaja como ID numérico)
@@ -132,8 +139,11 @@ const handleSaveUser = async (formData: any) => {
         isFormDialogOpen.value = false;
         selectedUser.value = null;
         await fetchUsers(); // Recargar la página actual
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error al guardar el usuario:', error);
+        if (error.response && error.response.status === 422) {
+            validationErrors.value = getLaravelValidationErrors(error);
+        }
     } finally {
         isSaving.value = false
     }
@@ -301,7 +311,7 @@ const getStatusConfig = (estado: string) => {
         </div>
 
         <!-- Modales Auxiliares -->
-        <UserModal :show="isFormDialogOpen" :user="selectedUser" :loading="isSaving" @close="isFormDialogOpen = false"
+        <UserModal :show="isFormDialogOpen" :user="selectedUser" :loading="isSaving" :validation-errors="validationErrors" @close="isFormDialogOpen = false"
             @save="handleSaveUser" />
         <UserDeleteModal :show="isDeleteDialogOpen" :user="selectedUser" @close="isDeleteDialogOpen = false"
             @confirm="handleDeleteUser" />

@@ -9,6 +9,7 @@ import BasePagination from '@/components/BasePagination.vue';
 import GrupoModal from './GrupoModal.vue';
 import GrupoDeleteModal from './GrupoDeleteModal.vue';
 import GrupoEstudiantesModal from './GrupoEstudiantesModal.vue';
+import { getLaravelValidationErrors } from '@/utils/errorHandler';
 
 // Catálogos cargados de form-data
 const materiasOptions = ref<{ id: number; nombre: string; }[]>([]);
@@ -19,6 +20,7 @@ const searchTerm = ref('');
 const selectedMateriaFilter = ref('all');
 const isLoading = ref(true);
 const isSaving = ref(false);
+const validationErrors = ref<Record<string, string[]> | undefined>(undefined);
 
 // Estados de Paginación
 const currentPage = ref(1);
@@ -88,11 +90,13 @@ watch(currentPage, () => {
 // Control de flujos de apertura de modales
 const openCreateModal = () => {
     selectedGrupo.value = null;
+    validationErrors.value = undefined;
     isFormModalOpen.value = true;
 };
 
 const openEditModal = (grupo: Grupo) => {
     selectedGrupo.value = grupo;
+    validationErrors.value = undefined;
     isFormModalOpen.value = true;
 };
 
@@ -109,6 +113,7 @@ const openEstudiantesModal = (grupo: Grupo) => {
 // Controladores de eventos del CRUD
 const handleSaveGrupo = async (formData: GrupoFormData) => {
     isSaving.value = true;
+    validationErrors.value = undefined;
     try {
         if (selectedGrupo.value) {
             await grupoService.actualizarGrupo(selectedGrupo.value.id, formData);
@@ -117,8 +122,11 @@ const handleSaveGrupo = async (formData: GrupoFormData) => {
         }
         isFormModalOpen.value = false; // Solo cierra si finaliza con éxito en la BD
         fetchGrupos();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error al guardar el grupo académico:', error);
+        if (error.response && error.response.status === 422) {
+            validationErrors.value = getLaravelValidationErrors(error);
+        }
     } finally {
         isSaving.value = false;
     }
@@ -269,7 +277,7 @@ onMounted(async () => {
         </div>
 
         <GrupoModal v-model="isFormModalOpen" :grupo="selectedGrupo" :is-saving="isSaving" :materias="materiasOptions"
-            @save="handleSaveGrupo" />
+            :validation-errors="validationErrors" @save="handleSaveGrupo" />
 
         <GrupoDeleteModal v-model="isDeleteModalOpen" :grupo="selectedGrupo" :is-saving="isSaving"
             @confirm="handleConfirmDelete" />

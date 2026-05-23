@@ -30,3 +30,10 @@ export const parseLaravelError = (error: unknown): string => {
     // 5. Fallback por si la API responde algo raro
     return `Error del servidor (${status}): Inténtelo más tarde.`;
 };
+
+export const getLaravelValidationErrors = (error: any): Record<string, string[]> => {
+    if (error && error.response?.status === 422 && error.response.data?.errors) {
+        return error.response.data.errors;
+    }
+    return {};
+};

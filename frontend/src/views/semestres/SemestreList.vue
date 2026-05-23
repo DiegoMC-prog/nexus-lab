@@ -8,12 +8,14 @@ import type { Semestre, SemestreFormData } from '@/types/semestre';
 import BasePagination from '@/components/BasePagination.vue';
 import SemestreModal from './SemestreModal.vue';
 import SemestreDeleteModal from './SemestreDeleteModal.vue';
+import { getLaravelValidationErrors } from '@/utils/errorHandler';
 
 // Estados Reactivos de Datos
 const semestres = ref<Semestre[]>([]);
 const searchTerm = ref('');
 const isLoading = ref(false);
 const isSaving = ref(false);
+const validationErrors = ref<Record<string, string[]> | undefined>(undefined);
 
 // Estados de Paginación
 const currentPage = ref(1);
@@ -61,11 +63,13 @@ watch(currentPage, () => {
 // Control de flujos de apertura de modales
 const openCreateModal = () => {
     selectedSemestre.value = null;
+    validationErrors.value = undefined;
     isFormModalOpen.value = true;
 };
 
 const openEditModal = (semestre: Semestre) => {
     selectedSemestre.value = semestre;
+    validationErrors.value = undefined;
     isFormModalOpen.value = true;
 };
 
@@ -77,6 +81,7 @@ const openDeleteModal = (semestre: Semestre) => {
 // Controladores de eventos del CRUD
 const handleSaveSemestre = async (formData: SemestreFormData) => {
     isSaving.value = true;
+    validationErrors.value = undefined;
     try {
         if (selectedSemestre.value) {
             await semestreService.actualizarSemestre(selectedSemestre.value.id, formData);
@@ -85,8 +90,11 @@ const handleSaveSemestre = async (formData: SemestreFormData) => {
         }
         isFormModalOpen.value = false; // Solo cierra si finaliza con éxito en la BD
         fetchSemestres();
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error al guardar el semestre académico:', error);
+        if (error.response && error.response.status === 422) {
+            validationErrors.value = getLaravelValidationErrors(error);
+        }
     } finally {
         isSaving.value = false;
     }
@@ -199,7 +207,7 @@ onMounted(() => {
         </div>
 
         <SemestreModal v-model="isFormModalOpen" :semestre="selectedSemestre" :is-saving="isSaving"
-            @save="handleSaveSemestre" />
+            :validation-errors="validationErrors" @save="handleSaveSemestre" />
 
         <SemestreDeleteModal v-model="isDeleteModalOpen" :semestre="selectedSemestre" :is-saving="isSaving"
             @confirm="handleConfirmDelete" />
