@@ -7,6 +7,7 @@ use App\Models\Laboratorio;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class EstacionSeeder extends Seeder
 {
@@ -28,12 +29,13 @@ class EstacionSeeder extends Seeder
         for ($i = 1; $i <= 10; $i++) {
             $lab = $laboratorios->get(($i - 1) % $laboratorios->count());
             // Asignar estudiante de manera alternada, algunos nulos
-            $estudianteId = ($i % 3 === 0 && $estudiantesCount > 0) 
-                ? $estudiantes->get(($i / 3 - 1) % $estudiantesCount)->id 
+            $estudianteId = ($i % 3 === 0 && $estudiantesCount > 0)
+                ? $estudiantes->get(($i / 3 - 1) % $estudiantesCount)->id
                 : null;
 
             Estacion::create([
                 'laboratorio_id' => $lab->id,
+                'uuid' => Str::uuid(),
                 'estudiante_actual_id' => $estudianteId,
                 'hostname' => 'PC-LAB-' . str_pad($i, 2, '0', STR_PAD_LEFT),
                 'direccion_mac' => sprintf('00:1A:2B:3C:4D:%02X', $i),

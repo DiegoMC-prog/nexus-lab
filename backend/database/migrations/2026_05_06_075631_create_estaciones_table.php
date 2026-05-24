@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('laboratorio_id')->constrained('laboratorios')->onDelete('cascade');
             $table->foreignId('estudiante_actual_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->uuid();
             $table->string('hostname', 255);
             $table->string('direccion_mac');
             $table->string('direccion_ip');
