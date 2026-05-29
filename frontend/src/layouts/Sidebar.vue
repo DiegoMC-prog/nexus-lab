@@ -13,58 +13,59 @@ import {
     Users,
     User,
     Shield,
-    Settings,
     MonitorSmartphone,
-    Laptop
+    Laptop,
+    Bell,
+    Terminal
 } from '@lucide/vue';
 
 const authStore = useAuthStore();
 
-// Estructura organizada por bloques lógicos de negocio
+// Estructura organizada por bloques lógicos de negocio.
+// Cada ítem define el permiso mínimo necesario para ser visible.
 const navSections = [
     {
         label: 'Monitoreo y Control',
         items: [
-            { to: '/', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'supervisor', 'operador'] },
-            { to: '/monitoring', label: 'Monitoreo', icon: Activity, roles: ['admin', 'supervisor', 'operador'] },
-            { to: '/history', label: 'Historial', icon: History, roles: ['admin', 'supervisor'] },
+            { to: '/', label: 'Dashboard', icon: LayoutDashboard, permission: 'dashboard.ver' },
+            { to: '/monitoring', label: 'Monitoreo', icon: Activity, permission: 'monitoreo.ver' },
+            { to: '/history', label: 'Historial', icon: History, permission: 'comandos.ver' },
+            { to: '/config-alertas', label: 'Reglas de Alertas', icon: Bell, permission: 'alertas.ver' },
+            { to: '/comandos', label: 'Comandos', icon: Terminal, permission: 'comandos.ver' },
         ]
     },
     {
         label: 'Gestión de Espacios',
         items: [
-            { to: '/horarios', label: 'Horarios', icon: Calendar, roles: ['admin', 'supervisor', 'operador', 'docente'] },
-            { to: '/laboratorios', label: 'Laboratorios', icon: Building2, roles: ['admin', 'supervisor'] },
-            { to: '/estaciones', label: 'Estaciones', icon: Laptop, roles: ['admin', 'supervisor'] },
+            { to: '/horarios', label: 'Horarios', icon: Calendar, permission: 'horarios.ver' },
+            { to: '/laboratorios', label: 'Laboratorios', icon: Building2, permission: 'laboratorios.ver' },
+            { to: '/estaciones', label: 'Estaciones', icon: Laptop, permission: 'estaciones.ver' },
         ]
     },
     {
         label: 'Estructura Académica',
         items: [
-            { to: '/carreras', label: 'Carreras', icon: GraduationCap, roles: ['admin'] },
-            { to: '/semestres', label: 'Semestres', icon: Layers, roles: ['admin'] },
-            { to: '/materias', label: 'Materias', icon: BookOpen, roles: ['admin'] },
-            { to: '/grupos', label: 'Grupos', icon: Users, roles: ['admin'] },
+            { to: '/carreras', label: 'Carreras', icon: GraduationCap, permission: 'carreras.ver' },
+            { to: '/semestres', label: 'Semestres', icon: Layers, permission: 'semestres.ver' },
+            { to: '/materias', label: 'Materias', icon: BookOpen, permission: 'materias.ver' },
+            { to: '/grupos', label: 'Grupos', icon: Users, permission: 'grupos.ver' },
         ]
     },
     {
         label: 'Administración',
         items: [
-            { to: '/users', label: 'Usuarios', icon: User, roles: ['admin'] },
-            { to: '/roles', label: 'Roles', icon: Shield, roles: ['admin'] },
-            { to: '/settings', label: 'Configuración', icon: Settings, roles: ['admin', 'supervisor'] }
+            { to: '/users', label: 'Usuarios', icon: User, permission: 'usuarios.ver' },
+            { to: '/roles', label: 'Roles', icon: Shield, permission: 'roles.ver' },
         ]
     }
 ];
 
-// Filtramos dinámicamente las secciones y sus ítems basándonos en el rol del usuario
+// Filtramos dinámicamente las secciones y sus ítems según los permisos reales del usuario
 const visibleSections = computed(() => {
-    const userRole = authStore.user?.role?.toLowerCase() || '';
-
     return navSections
         .map(section => ({
             ...section,
-            items: section.items.filter(item => item.roles.includes(userRole))
+            items: section.items.filter(item => authStore.can(item.permission))
         }))
         .filter(section => section.items.length > 0); // Oculta secciones vacías por completo
 });
@@ -115,6 +116,16 @@ const visibleSections = computed(() => {
         </nav>
 
         <div class="p-4 border-t border-gray-900 bg-gray-950/50">
+            <!-- Badge del rol activo -->
+            <div class="flex items-center gap-2 px-2 mb-3">
+                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                    {{ authStore.user?.name?.charAt(0)?.toUpperCase() || 'U' }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-semibold text-gray-300 truncate">{{ authStore.user?.name || 'Usuario' }}</p>
+                    <p class="text-[10px] text-gray-600 capitalize font-medium">{{ authStore.user?.role || 'Sin rol' }}</p>
+                </div>
+            </div>
             <div class="flex flex-col gap-0.5 text-[11px] text-gray-600 px-2 font-medium">
                 <p>Sistema v1.1.0</p>
                 <p>© 2026 NexusLab Manager</p>

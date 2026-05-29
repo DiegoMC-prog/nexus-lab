@@ -6,6 +6,7 @@ import {
 } from '@lucide/vue'; // Usando tu librería oficial de iconos
 import type { Laboratorio, LaboratorioFormData } from '@/types/laboratorio';
 import { laboratorioService } from '@/services/laboratorioService';
+import { useAuthStore } from '@/stores/auth';
 
 // Componentes modulares
 import LaboratorioModal from './LaboratorioModal.vue';
@@ -13,6 +14,8 @@ import LaboratorioDeleteModal from './LaboratorioDeleteModal.vue';
 import LaboratorioVincularModal from './LaboratorioVincularModal.vue';
 import BasePagination from '@/components/BasePagination.vue';
 import { getLaravelValidationErrors } from '@/utils/errorHandler';
+
+const authStore = useAuthStore();
 
 // --- ESTADO REACTIVO DE LA API ---
 const laboratorios = ref<Laboratorio[]>([]);
@@ -169,7 +172,7 @@ const handleDeleteLaboratorio = async () => {
             </div>
 
             <div v-if="isInitializing" class="w-32 h-10 bg-gray-200 animate-pulse rounded-md"></div>
-            <button v-else @click="openCreateDialog"
+            <button v-else-if="authStore.can('laboratorios.crear')" @click="openCreateDialog"
                 class="bg-blue-600 hover:bg-blue-700 text-white gap-2 flex items-center px-4 py-2 rounded-md transition-colors text-sm font-medium shadow-sm cursor-pointer">
                 <Plus class="w-4 h-4" />
                 Nuevo Laboratorio
@@ -248,16 +251,16 @@ const handleDeleteLaboratorio = async () => {
                     </div>
 
                     <div class="flex items-center gap-2 pt-4 border-t border-gray-100 mt-auto">
-                        <button @click="openEditDialog(lab)"
+                        <button v-if="authStore.can('laboratorios.editar')" @click="openEditDialog(lab)"
                             class="flex-1 inline-flex items-center justify-center px-3 py-1.5 border border-gray-200 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 transition-colors cursor-pointer">
                             <Edit class="w-4 h-4 mr-1" /> Editar
                         </button>
-                        <button @click="openVincularDialog(lab)"
+                        <button v-if="authStore.can('laboratorios.editar')" @click="openVincularDialog(lab)"
                             title="Vincular Estaciones"
                             class="inline-flex items-center justify-center p-1.5 border border-gray-200 rounded-md text-emerald-600 bg-white hover:bg-emerald-50 transition-colors cursor-pointer">
                             <Network class="w-4 h-4" />
                         </button>
-                        <button @click="openDeleteDialog(lab)"
+                        <button v-if="authStore.can('laboratorios.eliminar')" @click="openDeleteDialog(lab)"
                             class="inline-flex items-center justify-center p-1.5 border border-gray-200 rounded-md text-red-600 bg-white hover:bg-red-50 transition-colors cursor-pointer">
                             <Trash2 class="w-4 h-4" />
                         </button>

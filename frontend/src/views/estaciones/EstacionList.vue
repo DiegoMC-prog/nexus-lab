@@ -7,7 +7,10 @@ import {
 } from '@lucide/vue';
 import { estacionService } from '@/services/estacionService';
 import { laboratorioService } from '@/services/laboratorioService';
+import { useAuthStore } from '@/stores/auth';
 import type { Laboratorio } from '@/types/laboratorio';
+
+const authStore = useAuthStore();
 
 // Componentes del Sistema
 import BasePagination from '@/components/BasePagination.vue';
@@ -307,7 +310,7 @@ onMounted(async () => {
                                     <Activity class="w-4 h-4" />
                                 </button>
                                 
-                                <button @click="openDeleteModal(estacion)"
+                                <button v-if="authStore.can('estaciones.eliminar')" @click="openDeleteModal(estacion)"
                                     class="inline-flex items-center justify-center p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                                     title="Desvincular y Eliminar de la Red">
                                     <Trash2 class="w-4 h-4" />

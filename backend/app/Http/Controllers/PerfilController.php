@@ -8,42 +8,69 @@ use Illuminate\Http\Request;
 class PerfilController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display the authenticated user's profile.
      */
-    public function index()
+    public function show(Request $request)
     {
-        //
+        $user = $request->user();
+
+        // Obtener o crear el perfil asociado al usuario autenticado
+        $perfil = Perfil::firstOrCreate(
+            ['user_id' => $user->id],
+            ['telefono' => '', 'departamento' => '']
+        );
+
+        $perfil->load('usuario');
+
+        return response()->json([
+            'status' => 'success',
+            'perfil' => $perfil
+        ]);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Update the authenticated user's profile and account settings.
      */
-    public function store(Request $request)
+    public function update(Request $request)
     {
-        //
-    }
+        $user = $request->user();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Perfil $perfil)
-    {
-        //
-    }
+        // Validación de datos personales, profesionales y credenciales
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+            'telefono' => 'required|string|max:50',
+            'departamento' => 'nullable|string|max:255',
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Perfil $perfil)
-    {
-        //
-    }
+        // Actualizar datos de la cuenta de usuario principal
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Perfil $perfil)
-    {
-        //
+        if (!empty($validated['password'])) {
+            $user->password = bcrypt($validated['password']);
+        }
+        
+        $user->save();
+
+        // Actualizar datos complementarios de perfil
+        $perfil = Perfil::firstOrCreate(
+            ['user_id' => $user->id],
+            ['telefono' => '', 'departamento' => '']
+        );
+
+        $perfil->update([
+            'telefono' => $validated['telefono'],
+            'departamento' => $validated['departamento'] ?? null,
+        ]);
+
+        $perfil->load('usuario');
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Perfil actualizado correctamente.',
+            'perfil' => $perfil
+        ]);
     }
 }

@@ -15,6 +15,11 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SemestreAcademicoController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ComandoController;
+use App\Http\Controllers\ConfigAlertaController;
+use App\Http\Controllers\LogsComandoController;
+use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\AlertasController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -67,6 +72,23 @@ Route::middleware('auth:sanctum')->group(function () {
         'logs-telemetria' => 'logsTelemetria'
     ]);
 
+    Route::apiResource('comandos', ComandoController::class);
+
+    Route::apiResource('config-alertas', ConfigAlertaController::class)->parameters([
+        'config-alertas' => 'configAlerta'
+    ]);
+
+    Route::apiResource('logs-comandos', LogsComandoController::class)->parameters([
+        'logs-comandos' => 'logsComando'
+    ]);
+
+    Route::get('perfil', [PerfilController::class, 'show']);
+    Route::put('perfil', [PerfilController::class, 'update']);
+
+    Route::apiResource('alertas', AlertasController::class)->parameters([
+        'alertas' => 'alerta'
+    ]);
+
     //modulo gestion de carreras
     Route::apiResource('carreras', CarreraController::class);
 
@@ -98,4 +120,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/roles/permisos', [RoleController::class, 'getPermisos']);
     Route::put('/roles/{id}/permissions', [RoleController::class, 'store']);
     Route::get('roles', [RoleController::class, 'index']);
+
+    // General Dashboard
+    Route::get('/dashboard/stats', [\App\Http\Controllers\DashboardController::class, 'getStats']);
 });

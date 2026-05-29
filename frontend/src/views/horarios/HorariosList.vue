@@ -11,8 +11,9 @@ import HorarioModal from './HorarioModal.vue';
 import HorarioDeleteModal from './HorarioDeleteModal.vue';
 import HorarioCalendarView from './HorarioCalendarView.vue';
 
-// Auth Store para verificar rol del usuario
+// Auth Store para verificar permisos del usuario
 const authStore = useAuthStore();
+// isDocente se mantiene para compatibilidad con filtros del backend (query param)
 const isDocente = computed(() => authStore.user?.role?.toLowerCase() === 'docente');
 
 // Catálogos cargados de form-data
@@ -264,8 +265,8 @@ onMounted(async () => {
                     </button>
                 </div>
 
-                <!-- Solo administradores o gestores crean horarios -->
-                <button v-if="!isDocente" @click="openCreateModal"
+                <!-- Solo con permiso para crear horarios -->
+                <button v-if="authStore.can('horarios.crear')" @click="openCreateModal"
                     class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm gap-2 transition-colors text-sm cursor-pointer">
                     <Plus class="w-4 h-4" />
                     Nuevo Horario
@@ -352,7 +353,7 @@ onMounted(async () => {
                             <th class="px-6 py-4">Día de la Semana</th>
                             <th class="px-6 py-4">Horas Reservadas</th>
                             <th class="px-6 py-4">Vigencia del Período</th>
-                            <th v-if="!isDocente" class="px-6 py-4 text-right">Acciones</th>
+                            <th v-if="authStore.can('horarios.editar') || authStore.can('horarios.eliminar')" class="px-6 py-4 text-right">Acciones</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
@@ -381,13 +382,13 @@ onMounted(async () => {
                             <td class="px-6 py-4 text-gray-500 font-medium text-xs">
                                 {{ horario.fecha_inicio }} al {{ horario.fecha_fin }}
                             </td>
-                            <td v-if="!isDocente" class="px-6 py-4 text-right space-x-1">
-                                <button @click="openEditModal(horario)"
+                            <td v-if="authStore.can('horarios.editar') || authStore.can('horarios.eliminar')" class="px-6 py-4 text-right space-x-1">
+                                <button v-if="authStore.can('horarios.editar')" @click="openEditModal(horario)"
                                     class="inline-flex items-center justify-center p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors cursor-pointer"
                                     title="Editar Horario">
                                     <Edit class="w-4 h-4" />
                                 </button>
-                                <button @click="openDeleteModal(horario)"
+                                <button v-if="authStore.can('horarios.eliminar')" @click="openDeleteModal(horario)"
                                     class="inline-flex items-center justify-center p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
                                     title="Eliminar Horario">
                                     <Trash2 class="w-4 h-4" />

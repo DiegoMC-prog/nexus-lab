@@ -9,6 +9,10 @@ import SemestreList from "@/views/semestres/SemestreList.vue";
 import UserList from "@/views/users/UserList.vue";
 import HorariosList from "@/views/horarios/HorariosList.vue";
 import EstacionList from "@/views/estaciones/EstacionList.vue";
+import ComandoList from "@/views/comandos/ComandoList.vue";
+import ConfigAlertaList from "@/views/config-alertas/ConfigAlertaList.vue";
+import AlertaList from "@/views/alertas/AlertaList.vue";
+import LogsComandoList from "@/views/logs-comandos/LogsComandoList.vue";
 import type { RouteRecordRaw } from "vue-router";
 
 export const routes: Array<RouteRecordRaw> = [
@@ -44,65 +48,92 @@ export const routes: Array<RouteRecordRaw> = [
                 path: '',
                 name: 'dashboard',
                 component: Dashboard,
-                meta: { title: 'Dashboard' },
+                meta: { title: 'Dashboard', permission: 'dashboard.ver' },
             },
             {
                 path: '/users',
                 name: 'Usuarios',
                 component: UserList,
-                meta: { title: 'Gestion de Usuarios' },
+                meta: { title: 'Gestion de Usuarios', permission: 'usuarios.ver' },
             },
             {
                 path: '/roles',
                 name: 'Roles',
                 component: RoleList,
-                meta: { title: 'Gestion de Roles' },
+                meta: { title: 'Gestion de Roles', permission: 'roles.ver' },
             },
             {
                 path: '/laboratorios',
                 name: 'Laboratorios',
                 component: LaboratorioList,
-                meta: { title: 'Gestion de Laboratorios' },
+                meta: { title: 'Gestion de Laboratorios', permission: 'laboratorios.ver' },
             },
             {
                 path: '/estaciones',
                 name: 'Estaciones',
                 component: EstacionList,
-                meta: { title: 'Gestion de Estaciones' },
+                meta: { title: 'Gestion de Estaciones', permission: 'estaciones.ver' },
             },
             {
                 path: '/carreras',
                 name: 'Carreras',
                 component: CarreraList,
-                meta: { title: 'Gestion de carreras' },
+                meta: { title: 'Gestion de carreras', permission: 'carreras.ver' },
             },
             {
                 path: '/semestres',
                 name: 'Semestres',
                 component: SemestreList,
-                meta: { title: 'Gestion de Ciclos Academicos' }
+                meta: { title: 'Gestion de Ciclos Academicos', permission: 'semestres.ver' }
             },
             {
                 path: '/materias',
                 name: 'Materias',
                 component: MateriasList,
-                meta: { title: 'Gestion de Materias' }
+                meta: { title: 'Gestion de Materias', permission: 'materias.ver' }
             },
             {
                 path: '/grupos',
                 name: 'Grupos',
                 component: GruposList,
-                meta: { title: 'Gestion de Grupos' }
+                meta: { title: 'Gestion de Grupos', permission: 'grupos.ver' }
             },
             {
                 path: '/horarios',
                 name: 'Horarios',
                 component: HorariosList,
-                meta: { title: 'Gestion de Horarios' }
+                meta: { title: 'Gestion de Horarios', permission: 'horarios.ver' }
             },
-
+            {
+                path: '/comandos',
+                name: 'Comandos',
+                component: ComandoList,
+                meta: { title: 'Plantillas de Comandos', permission: 'comandos.ver' }
+            },
+            {
+                path: '/config-alertas',
+                name: 'ConfigAlertas',
+                component: ConfigAlertaList,
+                meta: { title: 'Reglas de Alertas', permission: 'alertas.ver' }
+            },
+            {
+                path: '/monitoring',
+                name: 'Monitoreo',
+                component: AlertaList,
+                meta: { title: 'Monitoreo de Alertas', permission: 'monitoreo.ver' }
+            },
+            {
+                path: '/history',
+                name: 'Historial',
+                component: LogsComandoList,
+                meta: { title: 'Historial de Comandos', permission: 'comandos.ver' }
+            },
+            {
+                path: '/perfil',
+                name: 'Perfil',
+                component: () => import('@/views/perfil/Perfil.vue'),
+                meta: { title: 'Mi Perfil' }
+            },
         ]
     }
-
-
 ]

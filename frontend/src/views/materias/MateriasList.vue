@@ -3,12 +3,15 @@ import { ref, watch, onMounted } from 'vue';
 import { Search, Plus, Edit, Trash2, BookOpen, Loader2, Filter } from '@lucide/vue';
 import { materiaService } from '@/services/materiaService';
 import type { Materia, MateriaFormData } from '@/types/materia';
+import { useAuthStore } from '@/stores/auth';
 
 // Componentes del Sistema
 import BasePagination from '@/components/BasePagination.vue';
 import MateriaModal from './MateriaModal.vue';
 import MateriaDeleteModal from './MateriaDeleteModal.vue';
 import { getLaravelValidationErrors } from '@/utils/errorHandler';
+
+const authStore = useAuthStore();
 
 // Catálogos cargados de form-data
 const carreras = ref<{ id: number; nombre: string; }[]>([]);
@@ -186,7 +189,7 @@ onMounted(async () => {
                     {{ totalMaterias }} materias registradas en los diferentes programas académicos
                 </p>
             </div>
-            <button @click="openCreateModal"
+            <button v-if="authStore.can('materias.crear')" @click="openCreateModal"
                 class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm gap-2 transition-colors text-sm">
                 <Plus class="w-4 h-4" />
                 Nueva Materia
@@ -266,12 +269,12 @@ onMounted(async () => {
                                 {{ materia.creditos }}
                             </td>
                             <td class="px-6 py-4 text-right space-x-1">
-                                <button @click="openEditModal(materia)"
+                                <button v-if="authStore.can('materias.editar')" @click="openEditModal(materia)"
                                     class="inline-flex items-center justify-center p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
                                     title="Editar Materia">
                                     <Edit class="w-4 h-4" />
                                 </button>
-                                <button @click="openDeleteModal(materia)"
+                                <button v-if="authStore.can('materias.eliminar')" @click="openDeleteModal(materia)"
                                     class="inline-flex items-center justify-center p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                                     title="Eliminar Materia">
                                     <Trash2 class="w-4 h-4" />

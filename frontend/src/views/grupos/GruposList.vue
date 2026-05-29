@@ -3,6 +3,7 @@ import { ref, watch, onMounted } from 'vue';
 import { Search, Plus, Edit, Trash2, Users, Loader2, Filter, GraduationCap } from '@lucide/vue';
 import { grupoService } from '@/services/grupoService';
 import type { Grupo, GrupoFormData } from '@/types/grupo';
+import { useAuthStore } from '@/stores/auth';
 
 // Componentes del Sistema
 import BasePagination from '@/components/BasePagination.vue';
@@ -10,6 +11,8 @@ import GrupoModal from './GrupoModal.vue';
 import GrupoDeleteModal from './GrupoDeleteModal.vue';
 import GrupoEstudiantesModal from './GrupoEstudiantesModal.vue';
 import { getLaravelValidationErrors } from '@/utils/errorHandler';
+
+const authStore = useAuthStore();
 
 // Catálogos cargados de form-data
 const materiasOptions = ref<{ id: number; nombre: string; }[]>([]);
@@ -188,7 +191,7 @@ onMounted(async () => {
                     {{ totalGrupos }} grupos registrados en las asignaturas vigentes
                 </p>
             </div>
-            <button @click="openCreateModal"
+            <button v-if="authStore.can('grupos.crear')" @click="openCreateModal"
                 class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm gap-2 transition-colors text-sm">
                 <Plus class="w-4 h-4" />
                 Nuevo Grupo
@@ -255,12 +258,12 @@ onMounted(async () => {
                                     title="Gestionar Estudiantes">
                                     <GraduationCap class="w-4 h-4" />
                                 </button>
-                                <button @click="openEditModal(grupo)"
+                                <button v-if="authStore.can('grupos.editar')" @click="openEditModal(grupo)"
                                     class="inline-flex items-center justify-center p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
                                     title="Editar Grupo">
                                     <Edit class="w-4 h-4" />
                                 </button>
-                                <button @click="openDeleteModal(grupo)"
+                                <button v-if="authStore.can('grupos.eliminar')" @click="openDeleteModal(grupo)"
                                     class="inline-flex items-center justify-center p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                                     title="Eliminar Grupo">
                                     <Trash2 class="w-4 h-4" />

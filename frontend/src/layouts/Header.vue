@@ -60,10 +60,10 @@
                         </span>
                     </div>
                     <div class="py-2">
-                        <button @click="goToSettings"
+                        <button @click="goToProfile"
                             class="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 text-gray-700 text-left">
-                            <Settings class="h-4 w-4" />
-                            <span class="text-sm">Configuración</span>
+                            <User class="h-4 w-4" />
+                            <span class="text-sm">Mi Perfil</span>
                         </button>
                         <button @click="handleLogout"
                             class="w-full flex items-center gap-3 px-4 py-2 hover:bg-gray-50 text-red-600 text-left">
@@ -116,9 +116,9 @@ const handleLogout = async () => {
     router.push('/login');
 };
 
-const goToSettings = () => {
+const goToProfile = () => {
     showUserMenu.value = false;
-    router.push('/settings');
+    router.push('/perfil');
 };
 
 const getRoleBadgeColor = (role: string) => {
