@@ -2,7 +2,7 @@
 import { ref, onMounted, watch, computed } from 'vue';
 import {
     Search, Plus, Edit, Trash2, Building2,
-    CheckCircle2, XCircle, Loader2
+    CheckCircle2, XCircle, Loader2, Network
 } from '@lucide/vue'; // Usando tu librería oficial de iconos
 import type { Laboratorio, LaboratorioFormData } from '@/types/laboratorio';
 import { laboratorioService } from '@/services/laboratorioService';
@@ -10,6 +10,7 @@ import { laboratorioService } from '@/services/laboratorioService';
 // Componentes modulares
 import LaboratorioModal from './LaboratorioModal.vue';
 import LaboratorioDeleteModal from './LaboratorioDeleteModal.vue';
+import LaboratorioVincularModal from './LaboratorioVincularModal.vue';
 import BasePagination from '@/components/BasePagination.vue';
 import { getLaravelValidationErrors } from '@/utils/errorHandler';
 
@@ -33,6 +34,7 @@ const perPage = ref(10);
 // Control de Modales
 const isFormDialogOpen = ref(false);
 const isDeleteDialogOpen = ref(false);
+const isVincularDialogOpen = ref(false);
 const selectedLab = ref<Laboratorio | null>(null);
 
 // --- FUNCIÓN CENTRAL: PETICIÓN AL BACKEND ---
@@ -110,6 +112,11 @@ const openEditDialog = (lab: Laboratorio) => {
 const openDeleteDialog = (lab: Laboratorio) => {
     selectedLab.value = lab;
     isDeleteDialogOpen.value = true;
+};
+
+const openVincularDialog = (lab: Laboratorio) => {
+    selectedLab.value = lab;
+    isVincularDialogOpen.value = true;
 };
 
 const handleSaveLaboratorio = async (formData: LaboratorioFormData) => {
@@ -245,6 +252,11 @@ const handleDeleteLaboratorio = async () => {
                             class="flex-1 inline-flex items-center justify-center px-3 py-1.5 border border-gray-200 text-sm font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 transition-colors cursor-pointer">
                             <Edit class="w-4 h-4 mr-1" /> Editar
                         </button>
+                        <button @click="openVincularDialog(lab)"
+                            title="Vincular Estaciones"
+                            class="inline-flex items-center justify-center p-1.5 border border-gray-200 rounded-md text-emerald-600 bg-white hover:bg-emerald-50 transition-colors cursor-pointer">
+                            <Network class="w-4 h-4" />
+                        </button>
                         <button @click="openDeleteDialog(lab)"
                             class="inline-flex items-center justify-center p-1.5 border border-gray-200 rounded-md text-red-600 bg-white hover:bg-red-50 transition-colors cursor-pointer">
                             <Trash2 class="w-4 h-4" />
@@ -267,5 +279,7 @@ const handleDeleteLaboratorio = async () => {
 
         <LaboratorioDeleteModal :show="isDeleteDialogOpen" :lab="selectedLab" @close="isDeleteDialogOpen = false"
             @confirm="handleDeleteLaboratorio" />
+
+        <LaboratorioVincularModal :show="isVincularDialogOpen" :lab="selectedLab" @close="isVincularDialogOpen = false" />
     </div>
 </template>

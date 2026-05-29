@@ -14,7 +14,8 @@ import {
     User,
     Shield,
     Settings,
-    MonitorSmartphone
+    MonitorSmartphone,
+    Laptop
 } from '@lucide/vue';
 
 const authStore = useAuthStore();
@@ -34,6 +35,7 @@ const navSections = [
         items: [
             { to: '/horarios', label: 'Horarios', icon: Calendar, roles: ['admin', 'supervisor', 'operador', 'docente'] },
             { to: '/laboratorios', label: 'Laboratorios', icon: Building2, roles: ['admin', 'supervisor'] },
+            { to: '/estaciones', label: 'Estaciones', icon: Laptop, roles: ['admin', 'supervisor'] },
         ]
     },
     {

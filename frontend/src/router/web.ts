@@ -8,6 +8,7 @@ import RoleList from "@/views/roles/RoleList.vue";
 import SemestreList from "@/views/semestres/SemestreList.vue";
 import UserList from "@/views/users/UserList.vue";
 import HorariosList from "@/views/horarios/HorariosList.vue";
+import EstacionList from "@/views/estaciones/EstacionList.vue";
 import type { RouteRecordRaw } from "vue-router";
 
 export const routes: Array<RouteRecordRaw> = [
@@ -62,6 +63,12 @@ export const routes: Array<RouteRecordRaw> = [
                 name: 'Laboratorios',
                 component: LaboratorioList,
                 meta: { title: 'Gestion de Laboratorios' },
+            },
+            {
+                path: '/estaciones',
+                name: 'Estaciones',
+                component: EstacionList,
+                meta: { title: 'Gestion de Estaciones' },
             },
             {
                 path: '/carreras',

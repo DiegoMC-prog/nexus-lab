@@ -1,11 +1,15 @@
 <?php
 
+use App\Events\EstacionDetectadaEnCanal;
+use App\Http\Controllers\AgenteController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CarreraController;
 use App\Http\Controllers\CursoController;
+use App\Http\Controllers\EstacionController;
 use App\Http\Controllers\GrupoController;
 use App\Http\Controllers\HorarioController;
 use App\Http\Controllers\LaboratorioController;
+use App\Http\Controllers\LogsTelemetriaController;
 use App\Http\Controllers\MateriaController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RoleController;
@@ -14,6 +18,18 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/test-websocket', function () {
+
+    broadcast(new EstacionDetectadaEnCanal([
+        'laboratorio_target_id' => 1,
+        'mensaje' => 'Hola desde API Laravel',
+        'hora' => now()->toDateTimeString(),
+    ]));
+
+    return response()->json([
+        'ok' => true
+    ]);
+});
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
@@ -42,6 +58,15 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json($permisos);
     });
 
+    //modulo gestion de estaciones
+    Route::apiResource('estaciones', EstacionController::class)->parameters([
+        'estaciones' => 'estacion'
+    ]);;
+
+    Route::apiResource('logs-telemetria', LogsTelemetriaController::class)->parameters([
+        'logs-telemetria' => 'logsTelemetria'
+    ]);
+
     //modulo gestion de carreras
     Route::apiResource('carreras', CarreraController::class);
 
@@ -63,7 +88,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/horarios/form-data', [HorarioController::class, 'horarioFormData']);
     Route::apiResource('horarios', HorarioController::class);
 
-    //modulo gestion de laboratorios
     Route::apiResource('laboratorios', LaboratorioController::class);
 
     //modulo gestion de usuarios

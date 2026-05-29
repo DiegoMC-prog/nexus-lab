@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 #[Fillable(
     'laboratorio_id',
     'estudiante_actual_id',
+    'uuid',
     'hostname',
     'direccion_mac',
     'direccion_ip',

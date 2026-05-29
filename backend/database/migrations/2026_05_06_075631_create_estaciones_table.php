@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('estaciones', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('laboratorio_id')->constrained('laboratorios')->onDelete('cascade');
+            $table->foreignId('laboratorio_id')->nullable()->constrained('laboratorios')->onDelete('cascade');
             $table->foreignId('estudiante_actual_id')->nullable()->constrained('users')->nullOnDelete();
             $table->uuid();
             $table->string('hostname', 255);

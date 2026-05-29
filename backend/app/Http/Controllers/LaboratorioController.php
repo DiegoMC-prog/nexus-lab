@@ -126,4 +126,33 @@ class LaboratorioController extends Controller
             'message' => 'Laboratorio eliminado correctamente'
         ]);
     }
+
+    // Obtiene las PCs que no pertenecen a ningún laboratorio actualmente
+    public function obtenerPcsHuerfanas()
+    {
+        $pcs = \App\Models\Estacion::whereNull('laboratorio_id')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($pcs);
+    }
+
+    // Vincula las PCs seleccionadas al laboratorio correspondiente
+    public function vincularPcs(Request $request)
+    {
+        $request->validate([
+            'laboratorio_id' => 'required|exists:laboratorios,id',
+            'uuids'          => 'required|array',
+            'uuids.*'        => 'uuid'
+        ]);
+
+        // Actualización masiva eficiente mediante Eloquent
+        \App\Models\Estacion::whereIn('uuid', $request->uuids)
+            ->update([
+                'laboratorio_id' => $request->laboratorio_id,
+                'estado'         => 'desconectado' // Cambia de 'pendiente' a listo para operar
+            ]);
+
+        return response()->json(['status' => 'success', 'message' => 'Estaciones vinculadas correctamente.']);
+    }
 }
