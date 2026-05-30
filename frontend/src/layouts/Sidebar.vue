@@ -73,7 +73,7 @@ const visibleSections = computed(() => {
 
 <template>
     <aside
-        class="w-64 bg-gray-950 text-white flex flex-col h-screen fixed left-0 top-0 border-r border-gray-900 select-none">
+        class="w-64 bg-gray-950 text-white flex flex-col h-screen border-r border-gray-900 select-none shrink-0">
         <div class="p-6 border-b border-gray-900">
             <div class="flex items-center gap-3">
                 <div class="bg-blue-600 p-2 rounded-xl text-white shadow-lg shadow-blue-600/20">

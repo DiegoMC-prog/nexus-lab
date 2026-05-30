@@ -2,7 +2,7 @@
     <div class="flex h-screen bg-gray-50">
         <Sidebar />
 
-        <div class="flex-1 ml-64 flex flex-col">
+        <div class="flex-1 flex flex-col min-w-0">
             <Header />
 
             <main class="flex-1 overflow-auto">
