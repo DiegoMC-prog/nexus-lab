@@ -104,10 +104,14 @@ class DocenteDashboardController extends Controller
         // 1. Obtener PCs (Estaciones) del laboratorio asignado
         $estaciones = Estacion::with(['estudianteActual:id,name', 'ultimaTelemetria'])
             ->where('laboratorio_id', $claseActiva->laboratorio_id)
+            ->orderBy('hostname', 'asc')
             ->get()
             ->map(function ($estacion) {
                 // Online si su última conexión es menor a 5 minutos, de lo contrario Offline
                 $isOnline = $estacion->ultima_conexion && $estacion->ultima_conexion >= now()->subMinutes(5);
+
+                // Si está bloqueada en la base de datos, mantenemos su estado como bloqueado
+                $estadoFinal = $estacion->estado === 'bloqueado' ? 'bloqueado' : ($isOnline ? 'Online' : 'Offline');
 
                 return [
                     'id' => $estacion->id,
@@ -115,7 +119,7 @@ class DocenteDashboardController extends Controller
                     'hostname' => $estacion->hostname,
                     'direccion_ip' => $estacion->direccion_ip,
                     'so_info' => $estacion->so_info,
-                    'estado' => $isOnline ? 'Online' : 'Offline',
+                    'estado' => $estadoFinal,
                     'estudiante' => $estacion->estudianteActual ? [
                         'name' => $estacion->estudianteActual->name
                     ] : null,
@@ -175,4 +179,61 @@ class DocenteDashboardController extends Controller
             'infracciones' => $infracciones
         ], 200);
     }
+
+    /**
+     * Ejecuta una acción remota (bloquear, desbloquear, cerrar sesión) sobre una estación específica.
+     */
+    public function ejecutarAccionEstacion(Request $request, $id)
+    {
+        $request->validate([
+            'accion' => 'required|in:bloquear,desbloquear,cerrar_sesion',
+        ]);
+
+        $accion = $request->accion;
+        $estacion = Estacion::findOrFail($id);
+
+        // Buscar o crear el comando correspondiente en el catálogo
+        $comando = \App\Models\Comando::where('slug', $accion)->first();
+        if (!$comando) {
+            $comando = \App\Models\Comando::create([
+                'nombre' => ucfirst(str_replace('_', ' ', $accion)),
+                'slug' => $accion,
+                'tipo' => 'sistema',
+                'require_auth' => false,
+            ]);
+        }
+
+        // Registrar la orden en el historial de logs de comandos
+        \App\Models\LogsComando::create([
+            'estacion_id' => $estacion->id,
+            'usuario_id' => $request->user()->id,
+            'comando_id' => $comando->id,
+            'estado' => 'ejecutado',
+            'origen' => 'docente_dashboard',
+            'mensaje_respuesta' => 'Acción "' . $accion . '" transmitida exitosamente al agente Nexus de ' . $estacion->hostname . '.',
+        ]);
+
+        // Simulación: Cambiamos el estado de la estación de acuerdo a la acción remota solicitada
+        if ($accion === 'cerrar_sesion') {
+            $estacion->update([
+                'estudiante_actual_id' => null,
+                'estado' => 'activo',
+            ]);
+        } elseif ($accion === 'bloquear') {
+            $estacion->update([
+                'estado' => 'bloqueado',
+            ]);
+        } elseif ($accion === 'desbloquear') {
+            $estacion->update([
+                'estado' => 'activo',
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Acción "' . $accion . '" enviada correctamente a la estación ' . $estacion->hostname . '.',
+            'estacion_id' => $estacion->id,
+            'accion' => $accion,
+        ], 200);
+    }
 }
+

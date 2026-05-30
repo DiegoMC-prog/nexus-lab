@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import api from '@/services/api';
+import { docenteDashboardService } from '@/services/docenteDashboardService';
+import type { LiveEstacion, LiveInfraccion, LiveClaseInfo } from '@/types/docenteDashboard';
+import EstacionPantallaModal from './EstacionPantallaModal.vue';
 import { 
-    Cpu, Database, Clock, Users, Monitor, Loader2, 
-    RefreshCw, ArrowLeft, Activity, ShieldAlert, CheckCircle2 
+    Cpu, Database, Clock, Users, Monitor, 
+    RefreshCw, ArrowLeft, Activity, ShieldAlert, CheckCircle2,
+    Lock, LockOpen, LogOut
 } from '@lucide/vue';
 
 // --- ESTADOS REACTIVOS ---
@@ -14,60 +17,57 @@ const isLoading = ref(true);
 const isPolling = ref(false);
 const errorMsg = ref('');
 
-interface Estacion {
-    id: number;
-    uuid: string;
-    hostname: string;
-    direccion_ip: string;
-    so_info: string | null;
-    estado: 'Online' | 'Offline';
-    estudiante: {
-        name: string;
-    } | null;
-    telemetria: {
-        carga_cpu: number;
-        uso_ram_mb: number;
-    } | null;
-}
+const infoClase = ref<LiveClaseInfo | null>(null);
+const estaciones = ref<LiveEstacion[]>([]);
+const infracciones = ref<LiveInfraccion[]>([]);
 
-interface Infraccion {
-    id: number;
-    estacion: {
-        hostname: string;
-    } | null;
-    usuario: {
-        name: string;
-    } | null;
-    nombre_proceso: string;
-    ruta_ejecutable: string | null;
-    accion_tomada: string;
-    created_at: string;
-}
+// Control de modal de pantalla de agente
+const isScreenModalOpen = ref(false);
+const selectedEstacionForScreen = ref<LiveEstacion | null>(null);
 
-interface ClaseInfo {
-    grupo: {
-        id: number;
-        nombre: string;
-        materia: {
-            nombre: string;
-            codigo: string;
-        } | null;
-    } | null;
-    laboratorio: {
-        id: number;
-        nombre: string;
-        pabellon: string;
-        piso: string;
-    };
-    hora_inicio: string;
-    hora_fin: string;
-}
+// Mapeo de vistas de pantalla de PCs (desktop | start_menu | file_explorer)
+const pcScreenViews = ref<Record<number, 'desktop' | 'start_menu' | 'file_explorer'>>({});
 
-const infoClase = ref<ClaseInfo | null>(null);
-const estaciones = ref<Estacion[]>([]);
-const infracciones = ref<Infraccion[]>([]);
+// Estado de bloqueo persistente simulado localmente para feedback inmediato de UI
+const lockedPCs = ref<Record<number, boolean>>({});
+
+// Acciones sobre estaciones
+const openScreenSimulationModal = (pc: LiveEstacion) => {
+    selectedEstacionForScreen.value = pc;
+    isScreenModalOpen.value = true;
+};
+
+const ejecutarAccion = async (pc: LiveEstacion, accion: 'bloquear' | 'desbloquear' | 'cerrar_sesion') => {
+    try {
+        await docenteDashboardService.ejecutarAccionEstacion(pc.id, accion);
+        
+        // Simular feedback de interfaz de usuario
+        if (accion === 'bloquear') {
+            lockedPCs.value[pc.id] = true;
+        } else if (accion === 'desbloquear') {
+            lockedPCs.value[pc.id] = false;
+        } else if (accion === 'cerrar_sesion') {
+            // Desconectar estudiante en la UI localmente de inmediato
+            pc.estudiante = null;
+        }
+    } catch (err) {
+        console.error(`Error al ejecutar acción remota "${accion}" en la estación ${pc.hostname}:`, err);
+    }
+};
+
+const getScreenImageForPC = (pcId: number) => {
+    const view = pcScreenViews.value[pcId] || 'desktop';
+    switch (view) {
+        case 'start_menu': return '/sim_start_menu.png';
+        case 'file_explorer': return '/sim_file_explorer.png';
+        case 'desktop':
+        default:
+            return '/sim_desktop.png';
+    }
+};
 
 let pollingInterval: ReturnType<typeof setInterval> | null = null;
+let screenTransitionInterval: ReturnType<typeof setInterval> | null = null;
 
 // --- OBTENCION DE DATOS ---
 const fetchLiveClassData = async (silent = false) => {
@@ -76,17 +76,32 @@ const fetchLiveClassData = async (silent = false) => {
     errorMsg.value = '';
 
     try {
-        const response = await api.get('/docente/clase-activa');
-        if (response.data.clase_activa) {
+        const res = await docenteDashboardService.getClaseActivaRealTime();
+        if (res.clase_activa) {
             claseActiva.value = true;
             infoClase.value = {
-                grupo: response.data.grupo,
-                laboratorio: response.data.laboratorio,
-                hora_inicio: response.data.hora_inicio,
-                hora_fin: response.data.hora_fin
+                grupo: res.grupo || null,
+                laboratorio: res.laboratorio!,
+                hora_inicio: res.hora_inicio!,
+                hora_fin: res.hora_fin!
             };
-            estaciones.value = response.data.estaciones;
-            infracciones.value = response.data.infracciones;
+            estaciones.value = res.estaciones || [];
+            infracciones.value = res.infracciones || [];
+
+            // Inicializar pantallas de PCs y sincronizar estado de bloqueo persistente
+            estaciones.value.forEach(pc => {
+                // Sincronizar el estado de bloqueo persistente desde el servidor
+                if (pc.estado === 'bloqueado') {
+                    lockedPCs.value[pc.id] = true;
+                } else {
+                    lockedPCs.value[pc.id] = false;
+                }
+
+                if (pc.estado !== 'Offline' && !pcScreenViews.value[pc.id]) {
+                    const views: ('desktop' | 'start_menu' | 'file_explorer')[] = ['desktop', 'start_menu', 'file_explorer'];
+                    pcScreenViews.value[pc.id] = views[pc.id % views.length];
+                }
+            });
         } else {
             claseActiva.value = false;
             infoClase.value = null;
@@ -102,7 +117,7 @@ const fetchLiveClassData = async (silent = false) => {
     }
 };
 
-// --- CICLO DE VIDA (Polling de 10 segundos) ---
+// --- CICLO DE VIDA (Polling e Intervalos) ---
 onMounted(() => {
     fetchLiveClassData();
     
@@ -110,12 +125,32 @@ onMounted(() => {
     pollingInterval = setInterval(() => {
         fetchLiveClassData(true);
     }, 10000);
+
+    // Bucle dinámico para transicionar/variar aleatoriamente las pantallas de los estudiantes en vivo
+    screenTransitionInterval = setInterval(() => {
+        const onlinePCs = estaciones.value.filter(e => e.estado !== 'Offline');
+        if (onlinePCs.length > 0) {
+            // Modificar la pantalla activa de hasta 3 estaciones simultáneas en cada intervalo
+            const count = Math.min(3, onlinePCs.length);
+            for (let i = 0; i < count; i++) {
+                const pc = onlinePCs[Math.floor(Math.random() * onlinePCs.length)];
+                const views: ('desktop' | 'start_menu' | 'file_explorer')[] = ['desktop', 'start_menu', 'file_explorer'];
+                const current = pcScreenViews.value[pc.id] || 'desktop';
+                const next = views.filter(v => v !== current);
+                pcScreenViews.value[pc.id] = next[Math.floor(Math.random() * next.length)];
+            }
+        }
+    }, 5000);
 });
 
 onUnmounted(() => {
     if (pollingInterval) {
         clearInterval(pollingInterval);
         pollingInterval = null;
+    }
+    if (screenTransitionInterval) {
+        clearInterval(screenTransitionInterval);
+        screenTransitionInterval = null;
     }
 });
 
@@ -124,13 +159,20 @@ const navigateBack = () => {
     router.push('/');
 };
 
+// Ordenar estáticamente las estaciones por hostname de forma natural/numérica
+const sortedEstaciones = computed(() => {
+    return [...estaciones.value].sort((a, b) => 
+        a.hostname.localeCompare(b.hostname, undefined, { numeric: true, sensitivity: 'base' })
+    );
+});
+
 // Estadísticas de la Clase
 const activeComputersCount = computed(() => {
-    return estaciones.value.filter(e => e.estado === 'Online').length;
+    return estaciones.value.filter(e => e.estado !== 'Offline').length;
 });
 
 const activeStudentsCount = computed(() => {
-    return estaciones.value.filter(e => e.estado === 'Online' && e.estudiante).length;
+    return estaciones.value.filter(e => e.estado !== 'Offline' && e.estudiante).length;
 });
 </script>
 
@@ -298,7 +340,7 @@ const activeStudentsCount = computed(() => {
                     </div>
                     <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div 
-                            v-for="pc in estaciones" 
+                            v-for="pc in sortedEstaciones" 
                             :key="pc.id"
                             class="border rounded-2xl p-4 transition-all duration-300 relative overflow-hidden flex flex-col justify-between"
                             :class="[
@@ -309,6 +351,21 @@ const activeStudentsCount = computed(() => {
                                         : 'bg-amber-50/40 hover:bg-amber-50 border-amber-200/80 shadow-3xs'
                             ]"
                         >
+                            <!-- Overlay de Estado Bloqueado -->
+                            <div 
+                                v-if="lockedPCs[pc.id]"
+                                class="absolute inset-0 bg-slate-950/75 backdrop-blur-xs flex flex-col items-center justify-center gap-2 text-white z-10 transition-all duration-300"
+                            >
+                                <Lock class="w-8 h-8 text-amber-400 animate-bounce" />
+                                <span class="text-3xs font-black uppercase tracking-widest text-slate-200">Estación Bloqueada</span>
+                                <button 
+                                    @click="ejecutarAccion(pc, 'desbloquear')"
+                                    class="mt-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-2.5 py-1 rounded-lg text-4xs uppercase tracking-wider transition-colors cursor-pointer"
+                                >
+                                    Desbloquear
+                                </button>
+                            </div>
+
                             <!-- Header de la tarjeta PC -->
                             <div class="flex items-start justify-between mb-2 gap-1.5 min-w-0">
                                 <div class="flex items-center gap-2 min-w-0 flex-1">
@@ -359,6 +416,30 @@ const activeStudentsCount = computed(() => {
                                 </p>
                             </div>
 
+                            <!-- Mini captura de pantalla en vivo -->
+                            <div 
+                                v-if="pc.estado !== 'Offline'"
+                                class="my-2 bg-slate-900 border border-slate-200 rounded-xl overflow-hidden aspect-video relative group cursor-pointer shadow-3xs hover:border-blue-400/80 hover:shadow-2xs transition-all duration-350 shrink-0"
+                                @click="openScreenSimulationModal(pc)"
+                                title="Clic para ampliar captura del agente"
+                            >
+                                <img 
+                                    :src="getScreenImageForPC(pc.id)" 
+                                    class="w-full h-full object-cover select-none pointer-events-none group-hover:scale-103 transition-transform duration-500" 
+                                    alt="Miniatura Pantalla"
+                                />
+                                <div class="absolute inset-0 bg-slate-900/10 group-hover:bg-slate-900/40 transition-colors flex items-center justify-center">
+                                    <div class="bg-white/95 backdrop-blur-xs border border-slate-100 rounded-xl p-1.5 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <Monitor class="w-4 h-4 text-blue-600 animate-pulse" />
+                                    </div>
+                                    
+                                    <!-- Tag de estado en miniatura -->
+                                    <span class="absolute bottom-1.5 right-1.5 bg-slate-900/85 text-white font-mono text-[8px] font-black px-1.5 py-0.5 rounded leading-none">
+                                        {{ pcScreenViews[pc.id] === 'start_menu' ? 'Inicio' : pcScreenViews[pc.id] === 'file_explorer' ? 'Explorador' : 'Escritorio' }}
+                                    </span>
+                                </div>
+                            </div>
+
                             <!-- Footer: Rendimiento CPU y RAM -->
                             <div class="space-y-2" v-if="pc.estado !== 'Offline' && pc.telemetria">
                                 <div class="flex items-center justify-between text-[10px] font-bold text-slate-655">
@@ -393,6 +474,36 @@ const activeStudentsCount = computed(() => {
                             </div>
                             <div v-else class="text-[10px] text-slate-400 italic text-center py-1">
                                 No disponible
+                            </div>
+
+                            <!-- Acciones Rápidas de Clase -->
+                            <div class="mt-4 pt-3 border-t border-slate-200/40 flex items-center justify-between gap-2 shrink-0" v-if="pc.estado !== 'Offline'">
+                                <button 
+                                    @click="openScreenSimulationModal(pc)"
+                                    class="inline-flex items-center justify-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-extrabold px-2.5 py-1.5 rounded-xl border border-blue-150 text-[10px] cursor-pointer transition-all duration-200 shadow-3xs flex-1"
+                                    title="Ver captura de pantalla en tiempo real del agente"
+                                >
+                                    <Monitor class="w-3.5 h-3.5" />
+                                    Pantalla
+                                </button>
+                                
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <button 
+                                        @click="ejecutarAccion(pc, 'bloquear')"
+                                        class="inline-flex items-center justify-center p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl border border-slate-250/60 cursor-pointer transition-all duration-200"
+                                        title="Bloquear estación de trabajo"
+                                    >
+                                        <Lock class="w-3.5 h-3.5" />
+                                    </button>
+                                    
+                                    <button 
+                                        @click="ejecutarAccion(pc, 'cerrar_sesion')"
+                                        class="inline-flex items-center justify-center p-2 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-xl cursor-pointer transition-all duration-200"
+                                        title="Cerrar la sesión de usuario actual"
+                                    >
+                                        <LogOut class="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -487,6 +598,13 @@ const activeStudentsCount = computed(() => {
                 </div>
             </div>
         </template>
+
+        <!-- Modal de Simulación de Pantallas del Agente -->
+        <EstacionPantallaModal 
+            v-model="isScreenModalOpen" 
+            :estacion="selectedEstacionForScreen" 
+            :current-view="selectedEstacionForScreen ? (pcScreenViews[selectedEstacionForScreen.id] || 'desktop') : 'desktop'"
+        />
     </div>
 </template>
 

@@ -10,6 +10,7 @@ import BasePagination from '@/components/BasePagination.vue';
 import GrupoModal from './GrupoModal.vue';
 import GrupoDeleteModal from './GrupoDeleteModal.vue';
 import GrupoEstudiantesModal from './GrupoEstudiantesModal.vue';
+import GrupoEstudiantesVerModal from './GrupoEstudiantesVerModal.vue';
 import { getLaravelValidationErrors } from '@/utils/errorHandler';
 
 const authStore = useAuthStore();
@@ -34,8 +35,10 @@ const totalGrupos = ref(0);
 const isFormModalOpen = ref(false);
 const isDeleteModalOpen = ref(false);
 const isEstudiantesModalOpen = ref(false);
+const isVerEstudiantesModalOpen = ref(false);
 const selectedGrupo = ref<Grupo | null>(null);
 const selectedGrupoForEstudiantes = ref<Grupo | null>(null);
+const selectedGrupoForVerEstudiantes = ref<Grupo | null>(null);
 
 // Carga los catálogos necesarios para los filtros y el formulario
 const loadFormCatalogs = async () => {
@@ -111,6 +114,11 @@ const openDeleteModal = (grupo: Grupo) => {
 const openEstudiantesModal = (grupo: Grupo) => {
     selectedGrupoForEstudiantes.value = grupo;
     isEstudiantesModalOpen.value = true;
+};
+
+const openVerEstudiantesModal = (grupo: Grupo) => {
+    selectedGrupoForVerEstudiantes.value = grupo;
+    isVerEstudiantesModalOpen.value = true;
 };
 
 // Controladores de eventos del CRUD
@@ -253,7 +261,12 @@ onMounted(async () => {
                                 {{ grupo.cupo_maximo > 0 ? `${grupo.cupo_maximo} alumnos` : 'Sin límite' }}
                             </td>
                             <td class="px-6 py-4 text-right space-x-1">
-                                <button @click="openEstudiantesModal(grupo)"
+                                <button @click="openVerEstudiantesModal(grupo)"
+                                    class="inline-flex items-center justify-center p-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                                    title="Ver Estudiantes Inscritos">
+                                    <Users class="w-4 h-4" />
+                                </button>
+                                <button v-if="authStore.can('grupos.editar')" @click="openEstudiantesModal(grupo)"
                                     class="inline-flex items-center justify-center p-2 text-purple-600 hover:text-purple-700 hover:bg-purple-50 rounded-lg transition-colors"
                                     title="Gestionar Estudiantes">
                                     <GraduationCap class="w-4 h-4" />
@@ -286,6 +299,8 @@ onMounted(async () => {
             @confirm="handleConfirmDelete" />
 
         <GrupoEstudiantesModal v-model="isEstudiantesModalOpen" :grupo="selectedGrupoForEstudiantes" />
+
+        <GrupoEstudiantesVerModal v-model="isVerEstudiantesModalOpen" :grupo="selectedGrupoForVerEstudiantes" />
     </div>
 </template>
 

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import api from '@/services/api';
 import { useAuthStore } from '@/stores/auth';
+import { docenteDashboardService } from '@/services/docenteDashboardService';
+import type { CronogramaItem } from '@/types/docenteDashboard';
 import { 
     BookOpen, Users, Clock, Database, Calendar, 
     MapPin, ArrowRight, Activity, RefreshCw, Loader2 
@@ -19,25 +20,6 @@ const kpis = ref({
     laboratorios_reservados: 0
 });
 
-interface CronogramaItem {
-    id: number;
-    hora_inicio: string;
-    hora_fin: string;
-    materia: {
-        nombre: string;
-        codigo: string;
-    } | null;
-    grupo: {
-        nombre: string;
-    } | null;
-    laboratorio: {
-        id: number;
-        nombre: string;
-        pabellon: string;
-        piso: string;
-    } | null;
-}
-
 const cronogramaHoy = ref<CronogramaItem[]>([]);
 const isLoading = ref(true);
 const isRefreshing = ref(false);
@@ -50,9 +32,9 @@ const loadDashboardData = async (silent = false) => {
     errorMsg.value = '';
 
     try {
-        const response = await api.get('/docente/dashboard');
-        kpis.value = response.data.kpis;
-        cronogramaHoy.value = response.data.cronograma_hoy;
+        const res = await docenteDashboardService.getDashboardData();
+        kpis.value = res.kpis;
+        cronogramaHoy.value = res.cronograma_hoy;
     } catch (error: any) {
         console.error('Error al cargar dashboard del docente:', error);
         errorMsg.value = 'No se pudo sincronizar la información del docente. Inténtelo de nuevo.';

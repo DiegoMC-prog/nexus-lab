@@ -136,4 +136,5 @@ Route::middleware('auth:sanctum')->group(function () {
     // Modulo Docente Dashboard y Monitoreo en Vivo
     Route::get('/docente/dashboard', [DocenteDashboardController::class, 'getHomeDashboard']);
     Route::get('/docente/clase-activa', [DocenteDashboardController::class, 'getClaseActivaRealTime']);
+    Route::post('/docente/estaciones/{id}/accion', [DocenteDashboardController::class, 'ejecutarAccionEstacion']);
 });
