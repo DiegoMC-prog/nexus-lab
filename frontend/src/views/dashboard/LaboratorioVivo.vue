@@ -99,7 +99,7 @@ const fetchLiveClassData = async (silent = false) => {
 
                 if (pc.estado !== 'Offline' && !pcScreenViews.value[pc.id]) {
                     const views: ('desktop' | 'start_menu' | 'file_explorer')[] = ['desktop', 'start_menu', 'file_explorer'];
-                    pcScreenViews.value[pc.id] = views[pc.id % views.length];
+                    pcScreenViews.value[pc.id] = views[pc.id % views.length] as 'desktop' | 'start_menu' | 'file_explorer';
                 }
             });
         } else {
@@ -134,10 +134,11 @@ onMounted(() => {
             const count = Math.min(3, onlinePCs.length);
             for (let i = 0; i < count; i++) {
                 const pc = onlinePCs[Math.floor(Math.random() * onlinePCs.length)];
+                if (!pc) continue;
                 const views: ('desktop' | 'start_menu' | 'file_explorer')[] = ['desktop', 'start_menu', 'file_explorer'];
                 const current = pcScreenViews.value[pc.id] || 'desktop';
                 const next = views.filter(v => v !== current);
-                pcScreenViews.value[pc.id] = next[Math.floor(Math.random() * next.length)];
+                pcScreenViews.value[pc.id] = next[Math.floor(Math.random() * next.length)] as 'desktop' | 'start_menu' | 'file_explorer';
             }
         }
     }, 5000);

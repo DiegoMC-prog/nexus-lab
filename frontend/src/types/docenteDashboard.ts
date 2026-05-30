@@ -35,7 +35,7 @@ export interface LiveEstacion {
     hostname: string;
     direccion_ip: string;
     so_info: string | null;
-    estado: 'Online' | 'Offline';
+    estado: 'Online' | 'Offline' | 'bloqueado';
     estudiante: {
         name: string;
     } | null;

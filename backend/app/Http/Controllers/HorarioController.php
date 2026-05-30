@@ -58,6 +58,8 @@ class HorarioController extends Controller
                 'nombre_laboratorio' => $horario->laboratorio?->nombre ?? 'Sin asignar',
                 'docente_id' => $horario->docente_id,
                 'nombre_docente' => $horario->docente?->name ?? 'Sin asignar',
+                'grupo_id' => $horario->grupo_id,
+                'nombre_grupo' => $horario->grupo?->nombre ?? 'Sin asignar',
                 'dia_semana' => $horario->dia_semana,
                 'dia_sema' => $horario->dia_semana,
                 'hora_inicio' => $horario->hora_inicio,
@@ -98,6 +100,8 @@ class HorarioController extends Controller
                 'nombre_laboratorio' => $horario->laboratorio?->nombre ?? 'Sin asignar',
                 'docente_id' => $horario->docente_id,
                 'nombre_docente' => $horario->docente?->name ?? 'Sin asignar',
+                'grupo_id' => $horario->grupo_id,
+                'nombre_grupo' => $horario->grupo?->nombre ?? 'Sin asignar',
                 'dia_semana' => $horario->dia_semana,
                 'hora_inicio' => $horario->hora_inicio,
                 'hora_fin' => $horario->hora_fin,
@@ -121,6 +125,8 @@ class HorarioController extends Controller
                 'nombre_laboratorio' => $horario->laboratorio?->nombre ?? 'Sin asignar',
                 'docente_id' => $horario->docente_id,
                 'nombre_docente' => $horario->docente?->name ?? 'Sin asignar',
+                'grupo_id' => $horario->grupo_id,
+                'nombre_grupo' => $horario->grupo?->nombre ?? 'Sin asignar',
                 'dia_semana' => $horario->dia_semana,
                 'hora_inicio' => $horario->hora_inicio,
                 'hora_fin' => $horario->hora_fin,
@@ -156,6 +162,8 @@ class HorarioController extends Controller
                 'nombre_laboratorio' => $horario->laboratorio?->nombre ?? 'Sin asignar',
                 'docente_id' => $horario->docente_id,
                 'nombre_docente' => $horario->docente?->name ?? 'Sin asignar',
+                'grupo_id' => $horario->grupo_id,
+                'nombre_grupo' => $horario->grupo?->nombre ?? 'Sin asignar',
                 'dia_semana' => $horario->dia_semana,
                 'hora_inicio' => $horario->hora_inicio,
                 'hora_fin' => $horario->hora_fin,
@@ -191,9 +199,16 @@ class HorarioController extends Controller
             ->get();
 
         $grupos = \App\Models\Grupo::query()
-            ->select(['id', 'nombre'])
+            ->with('materia:id,nombre')
+            ->select(['id', 'nombre', 'materia_id'])
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($grupo) {
+                return [
+                    'id' => $grupo->id,
+                    'nombre' => $grupo->materia ? ($grupo->materia->nombre . ' - ' . $grupo->nombre) : $grupo->nombre,
+                ];
+            });
 
         return response()->json([
             'laboratorios' => $laboratorios,

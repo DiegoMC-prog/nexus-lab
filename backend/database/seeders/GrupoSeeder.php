@@ -20,15 +20,14 @@ class GrupoSeeder extends Seeder
             return;
         }
 
-        // Crear 9 grupos: 3 paralelos para las primeras 3 materias
+        // Crear 30 grupos: 10 paralelos para las primeras 3 materias
         $materiasParaGrupos = $materias->take(3);
 
         foreach ($materiasParaGrupos as $materia) {
-            $paralelos = ['A', 'B', 'C'];
-            foreach ($paralelos as $paralelo) {
+            for ($i = 1; $i <= 10; $i++) {
                 Grupo::create([
                     'materia_id' => $materia->id,
-                    'nombre' => 'Paralelo ' . $paralelo,
+                    'nombre' => 'Paralelo ' . $i,
                     'gestion' => 'I/2026',
                     'cupo_maximo' => 40,
                 ]);

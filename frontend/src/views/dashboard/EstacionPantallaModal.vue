@@ -143,7 +143,7 @@ const getInitials = (name: string): string => {
                                             {{ estacion?.estudiante ? estacion.estudiante.name : 'Sesión Libre' }}
                                         </p>
                                         <p class="text-[9px] text-slate-450 font-bold truncate mt-1">
-                                            {{ estudianteInfo = (estacion?.estudiante ? 'Estudiante Registrado' : 'Sin credenciales') }}
+                                            {{ estacion?.estudiante ? 'Estudiante Registrado' : 'Sin credenciales' }}
                                         </p>
                                     </div>
                                 </div>
