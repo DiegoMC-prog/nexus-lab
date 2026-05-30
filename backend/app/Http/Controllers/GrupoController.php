@@ -7,9 +7,23 @@ use App\Http\Requests\Grupo\UpdateGrupoRequest;
 use App\Models\Grupo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Override;
 
-class GrupoController extends Controller
+class GrupoController extends Controller implements HasMiddleware
 {
+    #[Override]
+    public static function middleware()
+    {
+        return [
+            new Middleware('permission:grupos.ver', only: ['index', 'show', 'listarEstudiantes', 'GrupoFormData']),
+            new Middleware('permission:grupos.crear', only: ['store']),
+            new Middleware('permission:grupos.editar', only: ['update', 'actualizarEstudiantesGrupo', 'searchEstudiante']),
+            new Middleware('permission:grupos.eliminar', only: ['destroy']),
+        ];
+    }
+
     /**
      * Display a listing of the resource.
      */

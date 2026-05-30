@@ -97,66 +97,7 @@ const getInitials = (name: string): string => {
                         <X class="w-5 h-5" />
                     </button>
                 </div>
-
-                <!-- SELECTOR DE CAPTURAS / PESTAÑAS -->
-                <div class="px-6 py-2 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0 overflow-x-auto gap-4 custom-scrollbar">
-                    <div class="flex items-center gap-1.5 shrink-0 py-0.5">
-                        <button 
-                            @click="activeTab = 'live'"
-                            class="px-3.5 py-1.5 rounded-xl text-3xs font-extrabold uppercase tracking-wider transition-all duration-250 cursor-pointer flex items-center gap-1"
-                            :class="[
-                                activeTab === 'live' 
-                                    ? 'bg-purple-600 text-white shadow-sm shadow-purple-600/10' 
-                                    : 'text-slate-500 hover:bg-slate-105 hover:text-slate-800'
-                            ]"
-                        >
-                            <Play class="w-3 h-3 fill-current shrink-0" />
-                            🔴 En Vivo (Simulación)
-                        </button>
-                        
-                        <div class="h-4 w-px bg-slate-200 mx-1 shrink-0"></div>
-
-                        <button 
-                            @click="activeTab = 'desktop'"
-                            class="px-3 py-1.5 rounded-xl text-3xs font-extrabold uppercase tracking-wider transition-all duration-250 cursor-pointer"
-                            :class="[
-                                activeTab === 'desktop' 
-                                    ? 'bg-slate-205 text-slate-800 border border-slate-300 font-black' 
-                                    : 'text-slate-500 hover:bg-slate-105 hover:text-slate-800'
-                            ]"
-                        >
-                            Escritorio
-                        </button>
-                        <button 
-                            @click="activeTab = 'start_menu'"
-                            class="px-3 py-1.5 rounded-xl text-3xs font-extrabold uppercase tracking-wider transition-all duration-250 cursor-pointer"
-                            :class="[
-                                activeTab === 'start_menu' 
-                                    ? 'bg-slate-205 text-slate-800 border border-slate-300 font-black' 
-                                    : 'text-slate-500 hover:bg-slate-105 hover:text-slate-800'
-                            ]"
-                        >
-                            Menú Inicio
-                        </button>
-                        <button 
-                            @click="activeTab = 'file_explorer'"
-                            class="px-3 py-1.5 rounded-xl text-3xs font-extrabold uppercase tracking-wider transition-all duration-250 cursor-pointer"
-                            :class="[
-                                activeTab === 'file_explorer' 
-                                    ? 'bg-slate-205 text-slate-800 border border-slate-300 font-black' 
-                                    : 'text-slate-500 hover:bg-slate-105 hover:text-slate-800'
-                            ]"
-                        >
-                            Explorador
-                        </button>
-                    </div>
-
-                    <div class="text-[10px] text-slate-500 font-semibold flex items-center gap-1 shrink-0">
-                        <Calendar class="w-3.5 h-3.5 text-purple-600" />
-                        <span>Monitoreo Activo</span>
-                    </div>
-                </div>
-
+ 
                 <!-- CONTENEDOR PRINCIPAL -->
                 <div class="flex-1 overflow-y-auto p-6 bg-slate-50/50 flex flex-col lg:flex-row gap-6 min-h-[350px]">
                     
@@ -176,19 +117,12 @@ const getInitials = (name: string): string => {
                                 
                                 <!-- Indicador de captura activa -->
                                 <span class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-xs text-white border border-slate-700/50 font-mono text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-widest leading-none flex items-center gap-1.5 shadow-md">
-                                    <span class="w-1.5 h-1.5 rounded-full" :class="activeTab === 'live' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
-                                    {{ activeTab === 'live' ? 'LIVE' : 'FREEZE' }}
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    Monitoreo En Vivo
                                 </span>
-                                
-                                <!-- Overlay de estado de visualización -->
-                                <div class="absolute inset-0 bg-slate-900/10 group-hover:bg-slate-900/0 transition-colors flex items-center justify-center pointer-events-none">
-                                    <div class="bg-slate-900/80 backdrop-blur-xs border border-slate-700 px-3 py-1.5 rounded-full text-4xs font-black uppercase tracking-wider text-slate-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        Vista: {{ (activeScreenView || 'desktop').replace('_', ' ') }}
-                                    </div>
-                                </div>
                             </div>
                         </div>
-
+ 
                         <!-- Soporte físico simulado -->
                         <div class="w-20 h-4 bg-slate-800 border-x border-slate-750 mt-0.5 rounded-b-xs shadow-md"></div>
                         <div class="w-36 h-2 bg-slate-900 border border-slate-950 rounded-full shadow-lg"></div>

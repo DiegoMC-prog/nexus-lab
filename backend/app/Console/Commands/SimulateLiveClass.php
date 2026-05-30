@@ -184,7 +184,36 @@ class SimulateLiveClass extends Command
         $this->info("Presiona [Ctrl + C] para detener la simulación de clase.");
         $this->line("------------------------------------------------------------------");
 
-        $appsProhibidas = [
+        // Asegurar que existan restricciones en la base de datos para simular
+        if (\App\Models\RestriccionAplicacion::count() === 0) {
+            $appsProhibidasDefault = [
+                ['nombre_aplicacion' => 'Steam Client', 'nombre_proceso' => 'steam.exe', 'tipo_restriccion' => 'bloqueo_total'],
+                ['nombre_aplicacion' => 'Discord Chat', 'nombre_proceso' => 'discord.exe', 'tipo_restriccion' => 'bloqueo_total'],
+                ['nombre_aplicacion' => 'Spotify Music', 'nombre_proceso' => 'spotify.exe', 'tipo_restriccion' => 'bloqueo_total'],
+                ['nombre_aplicacion' => 'uTorrent Client', 'nombre_proceso' => 'utorrent.exe', 'tipo_restriccion' => 'bloqueo_total'],
+                ['nombre_aplicacion' => 'Google Chrome Incógnito', 'nombre_proceso' => 'chrome_incognito', 'tipo_restriccion' => 'bloqueo_total'],
+            ];
+            foreach ($appsProhibidasDefault as $app) {
+                \App\Models\RestriccionAplicacion::create([
+                    'laboratorio_id' => null,
+                    'nombre_aplicacion' => $app['nombre_aplicacion'],
+                    'nombre_proceso' => $app['nombre_proceso'],
+                    'tipo_restriccion' => $app['tipo_restriccion'],
+                    'activo' => true
+                ]);
+            }
+        }
+
+        // Obtener restricciones activas aplicables a este laboratorio (globales o específicas)
+        $restricciones = \App\Models\RestriccionAplicacion::where('activo', true)
+            ->where(function($query) use ($laboratorio) {
+                $query->whereNull('laboratorio_id')
+                      ->orWhere('laboratorio_id', $laboratorio->id);
+            })
+            ->get();
+
+        // Mapeo de rutas para el simulador de ejecutables realistas
+        $rutasEjecutables = [
             'steam.exe' => 'C:\\Program Files (x86)\\Steam\\steam.exe',
             'discord.exe' => 'C:\\Users\\Estudiante\\AppData\\Local\\Discord\\app-1.0.9001\\discord.exe',
             'spotify.exe' => 'C:\\Users\\Estudiante\\AppData\\Local\\Microsoft\\WindowsApps\\Spotify.exe',
@@ -238,11 +267,17 @@ class SimulateLiveClass extends Command
             $this->line("  -> Telemetría y estado de red actualizados para {$estaciones->count()} PCs.");
 
             // 7. Simular Alertas de Infracción (15% de probabilidad en cada ciclo de telemetría)
-            if (rand(1, 100) <= 15) {
-                $estacionConInfraccion = $estaciones->whereNotNull('estudiante_actual_id')->random();
+            if (rand(1, 100) <= 15 && $restricciones->isNotEmpty()) {
+                // Obtener las estaciones con estudiantes activos y que no estén bloqueadas
+                $estacionConInfraccion = $estaciones
+                    ->whereNotNull('estudiante_actual_id')
+                    ->filter(fn($e) => $e->estado !== 'bloqueado')
+                    ->random();
+
                 if ($estacionConInfraccion) {
-                    $nombreProceso = array_rand($appsProhibidas);
-                    $ruta = $appsProhibidas[$nombreProceso];
+                    $restriccion = $restricciones->random();
+                    $nombreProceso = $restriccion->nombre_proceso;
+                    $ruta = $rutasEjecutables[$nombreProceso] ?? "C:\\Program Files\\Simulado\\" . $nombreProceso;
 
                     $infraccion = LogAplicacionProhibida::create([
                         'estacion_id' => $estacionConInfraccion->id,

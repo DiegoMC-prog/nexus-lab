@@ -6,9 +6,21 @@ use App\Http\Requests\Role\StoreRoleRequest;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Override;
 
-class RoleController extends Controller
+class RoleController extends Controller implements HasMiddleware
 {
+    #[Override]
+    public static function middleware()
+    {
+        return [
+            new Middleware('permission:roles.ver', only: ['index', 'getPermisos']),
+            new Middleware('permission:roles.editar', only: ['store']),
+        ];
+    }
+
     /**
      * Display a listing of the resource.
      */

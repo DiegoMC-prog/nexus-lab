@@ -6,9 +6,23 @@ use App\Http\Requests\Comando\StoreComandoRequest;
 use App\Http\Requests\Comando\UpdateComandoRequest;
 use App\Models\Comando;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Override;
 
-class ComandoController extends Controller
+class ComandoController extends Controller implements HasMiddleware
 {
+    #[Override]
+    public static function middleware()
+    {
+        return [
+            new Middleware('permission:comandos.ver', only: ['index', 'show']),
+            new Middleware('permission:comandos.crear', only: ['store']),
+            new Middleware('permission:comandos.editar', only: ['update']),
+            new Middleware('permission:comandos.eliminar', only: ['destroy']),
+        ];
+    }
+
     /**
      * Display a listing of the resource.
      */
