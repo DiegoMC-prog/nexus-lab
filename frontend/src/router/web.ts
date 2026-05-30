@@ -129,6 +129,12 @@ export const routes: Array<RouteRecordRaw> = [
                 meta: { title: 'Historial de Comandos', permission: 'comandos.ver' }
             },
             {
+                path: '/restricciones',
+                name: 'Restricciones',
+                component: () => import('@/views/restricciones/RestriccionesView.vue'),
+                meta: { title: 'Restricciones de Aplicaciones', permission: 'manage-restrictions' }
+            },
+            {
                 path: '/perfil',
                 name: 'Perfil',
                 component: () => import('@/views/perfil/Perfil.vue'),

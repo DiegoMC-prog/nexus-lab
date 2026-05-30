@@ -30,6 +30,7 @@ const navSections = [
             { to: '/', label: 'Dashboard', icon: LayoutDashboard, permission: 'dashboard.ver' },
             { to: '/monitoring', label: 'Monitoreo', icon: Activity, permission: 'monitoreo.ver' },
             { to: '/history', label: 'Historial', icon: History, permission: 'comandos.ver' },
+            { to: '/restricciones', label: 'Restricciones', icon: Shield, permission: 'manage-restrictions' },
             { to: '/config-alertas', label: 'Reglas de Alertas', icon: Bell, permission: 'alertas.ver' },
             { to: '/comandos', label: 'Comandos', icon: Terminal, permission: 'comandos.ver' },
         ]

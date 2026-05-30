@@ -20,6 +20,7 @@ use App\Http\Controllers\ConfigAlertaController;
 use App\Http\Controllers\LogsComandoController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\AlertasController;
+use App\Http\Controllers\RestriccionAplicacionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -123,4 +124,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // General Dashboard
     Route::get('/dashboard/stats', [\App\Http\Controllers\DashboardController::class, 'getStats']);
+
+    // Modulo Restricciones de Aplicaciones
+    Route::apiResource('restricciones-aplicaciones', RestriccionAplicacionController::class)->parameters([
+        'restricciones-aplicaciones' => 'restriccionAplicacion'
+    ]);
+    Route::get('logs-aplicaciones-prohibidas', [RestriccionAplicacionController::class, 'getLogs']);
+    Route::post('restricciones/reportar-infraccion', [RestriccionAplicacionController::class, 'reportViolation']);
 });
