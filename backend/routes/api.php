@@ -21,6 +21,7 @@ use App\Http\Controllers\LogsComandoController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\AlertasController;
 use App\Http\Controllers\RestriccionAplicacionController;
+use App\Http\Controllers\DocenteDashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -131,4 +132,8 @@ Route::middleware('auth:sanctum')->group(function () {
     ]);
     Route::get('logs-aplicaciones-prohibidas', [RestriccionAplicacionController::class, 'getLogs']);
     Route::post('restricciones/reportar-infraccion', [RestriccionAplicacionController::class, 'reportViolation']);
+
+    // Modulo Docente Dashboard y Monitoreo en Vivo
+    Route::get('/docente/dashboard', [DocenteDashboardController::class, 'getHomeDashboard']);
+    Route::get('/docente/clase-activa', [DocenteDashboardController::class, 'getClaseActivaRealTime']);
 });

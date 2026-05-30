@@ -16,9 +16,14 @@ class HorarioController extends Controller
     {
         $query = Horario::query()->with(['laboratorio', 'docente', 'grupo']);
 
-        // 1. Lógica de seguridad: Si el usuario es docente, forzar su filtro
+        // 1. Lógica de seguridad: Si el usuario es docente o estudiante, forzar su filtro
         if (request()->user()->hasRole('docente')) {
             $query->where('docente_id', request()->user()->id);
+        } elseif (request()->user()->hasRole('estudiante')) {
+            $grupoIds = \Illuminate\Support\Facades\DB::table('grupo_user')
+                ->where('user_id', request()->user()->id)
+                ->pluck('grupo_id');
+            $query->whereIn('grupo_id', $grupoIds);
         } else {
             // 2. Filtro de Docente con validación de rol (solo para Admins)
             $query->when($request->filled('docente_id') && $request->docente_id !== 'all', function ($q) use ($request) {

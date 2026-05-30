@@ -28,6 +28,7 @@ const navSections = [
         label: 'Monitoreo y Control',
         items: [
             { to: '/', label: 'Dashboard', icon: LayoutDashboard, permission: 'dashboard.ver' },
+            { to: '/laboratorio-vivo', label: 'Clase en Vivo', icon: Activity, permission: 'monitoreo.ver' },
             { to: '/monitoring', label: 'Monitoreo', icon: Activity, permission: 'monitoreo.ver' },
             { to: '/history', label: 'Historial', icon: History, permission: 'comandos.ver' },
             { to: '/restricciones', label: 'Restricciones', icon: Shield, permission: 'manage-restrictions' },

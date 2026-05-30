@@ -16,6 +16,19 @@ class MateriaController extends Controller
     {
         $query = Materia::query()->with(['carrera', 'semestreAcademico']);
 
+        // Lógica de seguridad por rol: Docentes y Estudiantes solo ven sus materias correspondientes
+        if ($request->user()->hasRole('docente')) {
+            $grupoIds = \App\Models\Horario::where('docente_id', $request->user()->id)->pluck('grupo_id')->unique();
+            $materiaIds = \App\Models\Grupo::whereIn('id', $grupoIds)->pluck('materia_id')->unique();
+            $query->whereIn('materias.id', $materiaIds);
+        } elseif ($request->user()->hasRole('estudiante')) {
+            $grupoIds = \Illuminate\Support\Facades\DB::table('grupo_user')
+                ->where('user_id', $request->user()->id)
+                ->pluck('grupo_id');
+            $materiaIds = \App\Models\Grupo::whereIn('id', $grupoIds)->pluck('materia_id')->unique();
+            $query->whereIn('materias.id', $materiaIds);
+        }
+
         $query->when($request->filled('search'), function ($q) use ($request) {
             $search = "%{$request->search}%";
 

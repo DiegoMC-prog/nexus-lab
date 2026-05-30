@@ -52,6 +52,14 @@ const activeTab = ref('usuarios');
 
 const mockPermissions = computed<Permission[]>(() => {
     return allSystemPermissions.value.map(id => {
+        if (id === 'manage-restrictions') {
+            return {
+                id,
+                name: 'Gestionar Restricciones',
+                description: 'Permite administrar, crear, editar y eliminar políticas de bloqueo de aplicaciones e inspeccionar infracciones.',
+                category: 'laboratorios'
+            };
+        }
         const [moduleKey, actionKey] = id.split('.');
         const cleanModule = moduleTranslations[moduleKey || ''] || moduleKey;
         const cleanAction = actionTranslations[actionKey || ''] || actionKey;

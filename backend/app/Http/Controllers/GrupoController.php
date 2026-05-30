@@ -17,6 +17,17 @@ class GrupoController extends Controller
     {
         $query = Grupo::query()->with(['materia']);
 
+        // Lógica de seguridad por rol: Docentes y Estudiantes solo ven sus grupos asociados
+        if ($request->user()->hasRole('docente')) {
+            $grupoIds = \App\Models\Horario::where('docente_id', $request->user()->id)->pluck('grupo_id')->unique();
+            $query->whereIn('grupos.id', $grupoIds);
+        } elseif ($request->user()->hasRole('estudiante')) {
+            $grupoIds = \Illuminate\Support\Facades\DB::table('grupo_user')
+                ->where('user_id', $request->user()->id)
+                ->pluck('grupo_id');
+            $query->whereIn('grupos.id', $grupoIds);
+        }
+
         $query->when($request->filled('search'), function ($q) use ($request) {
             $search = $request->search;
 

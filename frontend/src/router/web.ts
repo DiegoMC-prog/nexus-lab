@@ -135,6 +135,18 @@ export const routes: Array<RouteRecordRaw> = [
                 meta: { title: 'Restricciones de Aplicaciones', permission: 'manage-restrictions' }
             },
             {
+                path: '/docente-dashboard',
+                name: 'DocenteDashboard',
+                component: () => import('@/views/dashboard/DocenteDashboard.vue'),
+                meta: { title: 'Dashboard Docente', permission: 'dashboard.ver' }
+            },
+            {
+                path: '/laboratorio-vivo',
+                name: 'LaboratorioVivo',
+                component: () => import('@/views/dashboard/LaboratorioVivo.vue'),
+                meta: { title: 'Clase en Vivo', permission: 'dashboard.ver' }
+            },
+            {
                 path: '/perfil',
                 name: 'Perfil',
                 component: () => import('@/views/perfil/Perfil.vue'),
