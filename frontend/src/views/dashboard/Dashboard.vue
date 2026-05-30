@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed, defineAsyncComponent } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { dashboardService, type DashboardStatsResponse } from '@/services/dashboardService';
 import { alertaService } from '@/services/alertaService';
-import DocenteDashboard from './DocenteDashboard.vue';
+const DocenteDashboard = defineAsyncComponent(() => import('./DocenteDashboard.vue'));
 import {
     Laptop, BookOpen, Users, AlertTriangle, CheckCircle2,
     RefreshCw, Clock, Calendar, MapPin, Cpu, Database,

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
-import { X, Search, Users, Loader2, Mail, GraduationCap } from '@lucide/vue';
+import { X, Search, Users, Loader2, Mail, GraduationCap, AlertCircle } from '@lucide/vue';
 import { grupoService } from '@/services/grupoService';
 import type { Grupo, GrupoEstudiante } from '@/types/grupo';
 
