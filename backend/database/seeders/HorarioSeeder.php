@@ -7,6 +7,7 @@ use App\Models\Horario;
 use App\Models\Laboratorio;
 use App\Models\Materia;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -19,34 +20,50 @@ class HorarioSeeder extends Seeder
     {
         $laboratorios = Laboratorio::all();
         $docentes = User::role('docente')->get();
-        $materias = Materia::all();
         $grupos = Grupo::all();
 
-        if ($laboratorios->isEmpty() || $docentes->isEmpty() || $materias->isEmpty() || $grupos->isEmpty()) {
+        if ($laboratorios->isEmpty() || $docentes->isEmpty() || $grupos->isEmpty()) {
             return;
         }
 
-        $docentesCount = $docentes->count();
+        $now = Carbon::now();
+        $diaSemanaActual = $now->dayOfWeekIso; // 1 = Lunes, 7 = Domingo
 
-        // Crear 10 horarios para las 10 materias, distribuidas en los laboratorios y asignadas a docentes
-        for ($i = 0; $i < 10; $i++) {
-            $materia = $materias->get($i);
-            $grupo = $grupos->where('materia_id', $materia->id)->first();
+        // Horarios para que la simulación se ejecute AHORA mismo
+        $horaInicioActual = $now->copy()->subMinutes(30)->format('H:i:s');
+        $horaFinActual = $now->copy()->addHours(2)->format('H:i:s');
+        
+        $fechaInicioSemestre = $now->copy()->subMonths(1)->format('Y-m-d');
+        $fechaFinSemestre = $now->copy()->addMonths(4)->format('Y-m-d');
+
+        // Crear 6 horarios en total
+        for ($i = 0; $i < 6; $i++) {
+            $grupo = $grupos->get($i % $grupos->count());
             $laboratorio = $laboratorios->get($i % $laboratorios->count());
-            $docente = $docentes->get($i % $docentesCount);
+            $docente = $docentes->get($i % $docentes->count());
 
-            if ($grupo && $laboratorio && $docente) {
-                Horario::create([
-                    'laboratorio_id' => $laboratorio->id,
-                    'docente_id' => $docente->id,
-                    'grupo_id' => $grupo->id,
-                    'dia_semana' => ($i % 5) + 1, // Lunes a Viernes
-                    'hora_inicio' => sprintf('%02d:00:00', 8 + ($i % 4) * 2), // Ej: 08:00, 10:00, 12:00, 14:00
-                    'hora_fin' => sprintf('%02d:30:00', 9 + ($i % 4) * 2), // Ej: 09:30, 11:30, 13:30, 15:30
-                    'fecha_inicio' => '2026-02-02',
-                    'fecha_fin' => '2026-06-25',
-                ]);
+            // Los primeros dos horarios serán "activos" en este instante
+            if ($i < 2) {
+                $diaSemana = $diaSemanaActual;
+                $horaInicio = $horaInicioActual;
+                $horaFin = $horaFinActual;
+            } else {
+                // Otros horarios aleatorios en la semana
+                $diaSemana = (($diaSemanaActual + $i) % 6) + 1; // Otros días
+                $horaInicio = sprintf('%02d:00:00', 8 + ($i % 4) * 2);
+                $horaFin = sprintf('%02d:30:00', 9 + ($i % 4) * 2);
             }
+
+            Horario::create([
+                'laboratorio_id' => $laboratorio->id,
+                'docente_id' => $docente->id,
+                'grupo_id' => $grupo->id,
+                'dia_semana' => $diaSemana,
+                'hora_inicio' => $horaInicio,
+                'hora_fin' => $horaFin,
+                'fecha_inicio' => $fechaInicioSemestre,
+                'fecha_fin' => $fechaFinSemestre,
+            ]);
         }
     }
 }

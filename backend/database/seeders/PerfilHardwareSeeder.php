@@ -20,7 +20,7 @@ class PerfilHardwareSeeder extends Seeder
             return;
         }
 
-        // Crear perfiles de hardware para cada una de las 10 estaciones
+        // Crear perfiles de hardware para cada estación
         $index = 1;
         foreach ($estaciones as $estacion) {
             PerfilHardware::create([

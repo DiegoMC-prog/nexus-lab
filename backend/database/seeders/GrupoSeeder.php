@@ -20,16 +20,19 @@ class GrupoSeeder extends Seeder
             return;
         }
 
-        // Crear 10 grupos, uno para cada una de las 10 materias
-        $index = 1;
-        foreach ($materias as $materia) {
-            Grupo::create([
-                'materia_id' => $materia->id,
-                'nombre' => 'Paralelo ' . ($index % 2 === 0 ? 'B' : 'A'),
-                'gestion' => 'I/2026',
-                'cupo_maximo' => 40,
-            ]);
-            $index++;
+        // Crear 9 grupos: 3 paralelos para las primeras 3 materias
+        $materiasParaGrupos = $materias->take(3);
+
+        foreach ($materiasParaGrupos as $materia) {
+            $paralelos = ['A', 'B', 'C'];
+            foreach ($paralelos as $paralelo) {
+                Grupo::create([
+                    'materia_id' => $materia->id,
+                    'nombre' => 'Paralelo ' . $paralelo,
+                    'gestion' => 'I/2026',
+                    'cupo_maximo' => 40,
+                ]);
+            }
         }
     }
 }

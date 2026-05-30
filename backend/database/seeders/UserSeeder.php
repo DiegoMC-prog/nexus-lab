@@ -14,53 +14,42 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // 3 usuarios obligatorios solicitados
+        // 1 Administrador
         $user = User::factory()->create([
-            'name' => 'Test User',
+            'name' => 'Admin User',
             'email' => 'test@example.com',
             'password' => Hash::make('password'),
         ]);
         $user->assignRole('admin');
 
-        $user = User::factory()->create([
-            'name' => 'docente',
+        // 3 Docentes (1 base + 2 extras)
+        $docenteBase = User::factory()->create([
+            'name' => 'Docente Principal',
             'email' => 'docente@gmail.com',
             'password' => Hash::make('docente123'),
         ]);
-        $user->assignRole('docente');
+        $docenteBase->assignRole('docente');
 
-        $user = User::factory()->create([
-            'name' => 'estudiante',
-            'email' => 'estudiante@gmail.com',
-            'password' => Hash::make('estudiante123'),
-        ]);
-        $user->assignRole('estudiante');
-
-        // 7 usuarios adicionales para completar 10 usuarios
-        // 2 Docentes adicionales
         for ($i = 2; $i <= 3; $i++) {
             $docente = User::factory()->create([
                 'name' => 'Docente Extra ' . $i,
                 'email' => 'docente' . $i . '@example.com',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('docente123'),
             ]);
             $docente->assignRole('docente');
         }
 
-        // 5 Estudiantes adicionales
-        for ($i = 2; $i <= 6; $i++) {
-            $estudiante = User::factory()->create([
-                'name' => 'Estudiante Extra ' . $i,
-                'email' => 'estudiante' . $i . '@example.com',
-                'password' => Hash::make('password123'),
-            ]);
-            $estudiante->assignRole('estudiante');
-        }
+        // 30 Estudiantes (1 base + 29 extras)
+        $estudianteBase = User::factory()->create([
+            'name' => 'Estudiante Base',
+            'email' => 'estudiante@gmail.com',
+            'password' => Hash::make('estudiante123'),
+        ]);
+        $estudianteBase->assignRole('estudiante');
 
-        $users = User::factory(100)->create();
-
-        foreach ($users as $user) {
-            $user->assignRole('estudiante');
+        $estudiantes = User::factory(29)->create();
+        foreach ($estudiantes as $est) {
+            $est->assignRole('estudiante');
         }
     }
 }

@@ -16,14 +16,11 @@ class CarreraSeeder extends Seeder
         $carreras = [
             ['nombre' => 'Ingeniería de Sistemas', 'codigo' => 'INF-SIS'],
             ['nombre' => 'Ingeniería Informática', 'codigo' => 'INF-INF'],
-            ['nombre' => 'Economía', 'codigo' => 'ECO-ECO'],
-            ['nombre' => 'Marketing y Publicidad', 'codigo' => 'MKT-PUB'],
-            ['nombre' => 'Diseño Gráfico', 'codigo' => 'DSN-GRA'],
-            ['nombre' => 'Administración de Empresas', 'codigo' => 'ADM-EMP'],
-            ['nombre' => 'Derecho', 'codigo' => 'DER-DER'],
+            ['nombre' => 'Ingeniería de Software', 'codigo' => 'INF-SFW'],
             ['nombre' => 'Ingeniería de Telecomunicaciones', 'codigo' => 'TEL-TEL'],
-            ['nombre' => 'Ingeniería Financiera', 'codigo' => 'ING-FIN'],
-            ['nombre' => 'Comunicación Social', 'codigo' => 'COM-SOC'],
+            ['nombre' => 'Ingeniería Mecatrónica', 'codigo' => 'MEC-MEC'],
+            ['nombre' => 'Ingeniería de Redes', 'codigo' => 'RED-RED'],
+            ['nombre' => 'Ciencias de la Computación', 'codigo' => 'COM-CIE'],
         ];
 
         foreach ($carreras as $carrera) {

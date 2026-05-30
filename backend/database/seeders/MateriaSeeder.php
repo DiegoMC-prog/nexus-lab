@@ -19,7 +19,6 @@ class MateriaSeeder extends Seeder
         $semestres = SemestreAcademico::all();
         $carreras = Carrera::all();
 
-        // En caso de que no existan carreras o semestres (por seguridad, aunque el orden del DatabaseSeeder lo garantiza)
         if ($semestres->isEmpty() || $carreras->isEmpty()) {
             return;
         }
@@ -30,70 +29,42 @@ class MateriaSeeder extends Seeder
                 'nombre' => 'Programación I',
                 'creditos' => 5,
                 'carrera_codigo' => 'INF-SIS',
-                'semestre_index' => 0 // 1er Semestre
+                'semestre_index' => 7 // 2026-I
             ],
             [
                 'codigo' => 'INF-121',
                 'nombre' => 'Estructura de Datos',
                 'creditos' => 5,
                 'carrera_codigo' => 'INF-INF',
-                'semestre_index' => 1 // 2do Semestre
+                'semestre_index' => 7 
             ],
             [
-                'codigo' => 'ECO-111',
-                'nombre' => 'Introducción a la Economía',
+                'codigo' => 'SFW-111',
+                'nombre' => 'Ingeniería de Requisitos',
                 'creditos' => 4,
-                'carrera_codigo' => 'ECO-ECO',
-                'semestre_index' => 0
+                'carrera_codigo' => 'INF-SFW',
+                'semestre_index' => 7
             ],
             [
-                'codigo' => 'ECO-121',
-                'nombre' => 'Microeconomía',
+                'codigo' => 'TEL-121',
+                'nombre' => 'Redes de Computadoras I',
                 'creditos' => 4,
-                'carrera_codigo' => 'ECO-ECO',
-                'semestre_index' => 1
-            ],
-            [
-                'codigo' => 'MKT-111',
-                'nombre' => 'Principios de Marketing',
-                'creditos' => 4,
-                'carrera_codigo' => 'MKT-PUB',
-                'semestre_index' => 0
-            ],
-            [
-                'codigo' => 'DSN-111',
-                'nombre' => 'Diseño Vectorial',
-                'creditos' => 3,
-                'carrera_codigo' => 'DSN-GRA',
-                'semestre_index' => 0
-            ],
-            [
-                'codigo' => 'ADM-111',
-                'nombre' => 'Teoría de la Administración',
-                'creditos' => 4,
-                'carrera_codigo' => 'ADM-EMP',
-                'semestre_index' => 0
-            ],
-            [
-                'codigo' => 'DER-111',
-                'nombre' => 'Introducción al Derecho',
-                'creditos' => 4,
-                'carrera_codigo' => 'DER-DER',
-                'semestre_index' => 0
-            ],
-            [
-                'codigo' => 'TEL-111',
-                'nombre' => 'Circuitos Eléctricos',
-                'creditos' => 5,
                 'carrera_codigo' => 'TEL-TEL',
-                'semestre_index' => 1
+                'semestre_index' => 7
             ],
             [
-                'codigo' => 'FIN-111',
-                'nombre' => 'Contabilidad Básica',
+                'codigo' => 'MEC-111',
+                'nombre' => 'Sistemas Embebidos',
                 'creditos' => 4,
-                'carrera_codigo' => 'ING-FIN',
-                'semestre_index' => 0
+                'carrera_codigo' => 'MEC-MEC',
+                'semestre_index' => 7
+            ],
+            [
+                'codigo' => 'RED-111',
+                'nombre' => 'Seguridad en Redes',
+                'creditos' => 3,
+                'carrera_codigo' => 'RED-RED',
+                'semestre_index' => 7
             ],
         ];
 

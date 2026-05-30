@@ -32,7 +32,7 @@ class PerfilSeeder extends Seeder
             'Pando',
         ];
 
-        // Crear un perfil para cada uno de los 10 usuarios
+        // Crear un perfil para cada usuario
         $index = 1;
         foreach ($usuarios as $usuario) {
             Perfil::create([
