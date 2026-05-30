@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:15-alpine
+    container_name: nexus-database
+    restart: unless-stopped
+    environment:
+      # Los valores provienen del archivo .env en la raíz
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - internal_network
+    # NOTA: No se expone el puerto al host para la BD (ej. ports: ["5432:5432"]), 
+    # manteniéndola accesible solo para los servicios dentro de 'internal_network'
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nexus-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    # Cargamos las variables del .env de la raíz a este contenedor
+    env_file:
+      - .env
+    environment:
+      # Forzamos a que el backend busque la base de datos en el contenedor correspondiente
+      DB_HOST: database
+      DB_PORT: 5432
+    networks:
+      - internal_network
+      - frontend_network
+    depends_on:
+      - database
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nexus-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - frontend_network
+    depends_on:
+      - backend
+
+networks:
+  # Red aislada para la comunicación entre el Backend y la Base de datos
+  internal_network:
+    driver: bridge
+  # Red para que el frontend pueda tener comunicación con el backend si fuera necesario a nivel interno
+  frontend_network:
+    driver: bridge
+
+volumes:
+  db_data:
