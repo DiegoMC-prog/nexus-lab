@@ -102,8 +102,8 @@ const handleSubmit = async () => {
                 <div class="inline-flex items-center justify-center bg-blue-600 p-4 rounded-2xl mb-4">
                     <MonitorSmartphone class="h-12 w-12 text-white" />
                 </div>
-                <h1 class="text-3xl font-semibold text-white mb-2">Control de Equipos</h1>
-                <p class="text-gray-300">Laboratorio de Cómputo</p>
+                <h1 class="text-3xl font-semibold text-white mb-2">NexusLab</h1>
+                <p class="text-gray-300">Gestión de Laboratorios</p>
             </div>
 
             <div class="bg-white rounded-2xl shadow-xl p-8">
