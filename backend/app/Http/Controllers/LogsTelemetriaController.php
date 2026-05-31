@@ -4,9 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\LogsTelemetria;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Override;
 
-class LogsTelemetriaController extends Controller
+class LogsTelemetriaController extends Controller implements HasMiddleware
 {
+    #[Override]
+    public static function middleware()
+    {
+        return [
+            new Middleware('permission:monitoreo.ver', only: ['index', 'show']),
+            new Middleware('permission:monitoreo.crear', only: ['store']),
+            new Middleware('permission:monitoreo.editar', only: ['update']),
+            new Middleware('permission:monitoreo.eliminar', only: ['destroy']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */

@@ -6,9 +6,22 @@ use App\Http\Requests\ConfigAlerta\StoreConfigAlertaRequest;
 use App\Http\Requests\ConfigAlerta\UpdateConfigAlertaRequest;
 use App\Models\ConfigAlerta;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Override;
 
-class ConfigAlertaController extends Controller
+class ConfigAlertaController extends Controller implements HasMiddleware
 {
+    #[Override]
+    public static function middleware()
+    {
+        return [
+            new Middleware('permission:alertas.ver', only: ['index', 'show']),
+            new Middleware('permission:alertas.crear', only: ['store']),
+            new Middleware('permission:alertas.editar', only: ['update']),
+            new Middleware('permission:alertas.eliminar', only: ['destroy']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */

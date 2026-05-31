@@ -7,9 +7,22 @@ use App\Http\Requests\Estacion\StoreEstacionRequest;
 use App\Http\Requests\Estacion\UpdateEstacionRequest;
 use App\Models\Estacion;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Override;
 
-class EstacionController extends Controller
+class EstacionController extends Controller implements HasMiddleware
 {
+    #[Override]
+    public static function middleware()
+    {
+        return [
+            new Middleware('permission:estaciones.ver', only: ['index', 'show']),
+            new Middleware('permission:estaciones.crear', only: ['store']),
+            new Middleware('permission:estaciones.editar', only: ['update']),
+            new Middleware('permission:estaciones.eliminar', only: ['destroy']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */

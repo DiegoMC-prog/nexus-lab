@@ -18,9 +18,15 @@ class AuthController extends Controller
 
         $user = User::query()->where('email', $credenciales->email)->first();
 
-        if (!$user || !Hash::check($credenciales->password, $user->password)) {
+        if (!$user) {
             return response()->json([
-                'message' => 'Credenciales Invalidas',
+                'message' => 'El correo electrónico no se encuentra registrado.',
+            ], 404);
+        }
+
+        if (!Hash::check($credenciales->password, $user->password)) {
+            return response()->json([
+                'message' => 'Credenciales incorrectas.',
             ], 401);
         }
 

@@ -6,9 +6,22 @@ use App\Http\Requests\LogsComando\StoreLogsComandoRequest;
 use App\Http\Requests\LogsComando\UpdateLogsComandoRequest;
 use App\Models\LogsComando;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Override;
 
-class LogsComandoController extends Controller
+class LogsComandoController extends Controller implements HasMiddleware
 {
+    #[Override]
+    public static function middleware()
+    {
+        return [
+            new Middleware('permission:comandos.ver', only: ['index', 'show']),
+            new Middleware('permission:comandos.crear', only: ['store']),
+            new Middleware('permission:comandos.editar', only: ['update']),
+            new Middleware('permission:comandos.eliminar', only: ['destroy']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */

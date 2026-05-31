@@ -6,9 +6,22 @@ use App\Http\Requests\Materia\StoreMateriaRequest;
 use App\Http\Requests\Materia\UpdateMateriaRequest;
 use App\Models\Materia;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Override;
 
-class MateriaController extends Controller
+class MateriaController extends Controller implements HasMiddleware
 {
+    #[Override]
+    public static function middleware()
+    {
+        return [
+            new Middleware('permission:materias.ver', only: ['index', 'show', 'MateriaFormData']),
+            new Middleware('permission:materias.crear', only: ['store']),
+            new Middleware('permission:materias.editar', only: ['update']),
+            new Middleware('permission:materias.eliminar', only: ['destroy']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */

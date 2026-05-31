@@ -6,9 +6,22 @@ use App\Http\Requests\SemestreAcademico\StoreSemestreAcademicoRequest;
 use App\Http\Requests\SemestreAcademico\UpdateSemestreRequest;
 use App\Models\SemestreAcademico;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Override;
 
-class SemestreAcademicoController extends Controller
+class SemestreAcademicoController extends Controller implements HasMiddleware
 {
+    #[Override]
+    public static function middleware()
+    {
+        return [
+            new Middleware('permission:semestres.ver', only: ['index', 'show']),
+            new Middleware('permission:semestres.crear', only: ['store']),
+            new Middleware('permission:semestres.editar', only: ['update']),
+            new Middleware('permission:semestres.eliminar', only: ['destroy']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */

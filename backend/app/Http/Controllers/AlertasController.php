@@ -6,9 +6,22 @@ use App\Http\Requests\Alerta\StoreAlertaRequest;
 use App\Http\Requests\Alerta\UpdateAlertaRequest;
 use App\Models\Alerta;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Override;
 
-class AlertasController extends Controller
+class AlertasController extends Controller implements HasMiddleware
 {
+    #[Override]
+    public static function middleware()
+    {
+        return [
+            new Middleware('permission:alertas.ver', only: ['index', 'show']),
+            new Middleware('permission:alertas.crear', only: ['store']),
+            new Middleware('permission:alertas.editar', only: ['update']),
+            new Middleware('permission:alertas.eliminar', only: ['destroy']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */

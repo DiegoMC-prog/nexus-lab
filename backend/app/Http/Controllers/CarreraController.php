@@ -6,9 +6,22 @@ use App\Http\Requests\Carrera\StoreCarreraRequest;
 use App\Http\Requests\Carrera\UpdateCarreraRequest;
 use App\Models\Carrera;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Override;
 
-class CarreraController extends Controller
+class CarreraController extends Controller implements HasMiddleware
 {
+    #[Override]
+    public static function middleware()
+    {
+        return [
+            new Middleware('permission:carreras.ver', only: ['index', 'show']),
+            new Middleware('permission:carreras.crear', only: ['store']),
+            new Middleware('permission:carreras.editar', only: ['update']),
+            new Middleware('permission:carreras.eliminar', only: ['destroy']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */
