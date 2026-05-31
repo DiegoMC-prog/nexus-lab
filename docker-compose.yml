@@ -23,8 +23,8 @@ services:
       dockerfile: Dockerfile
     container_name: nexus-backend
     restart: unless-stopped
-    ports:
-      - "8000:8000"
+    # ports:
+    #  - "8000:8000"
     # Cargamos las variables del .env de backend a este contenedor
     env_file:
       - ./backend/.env
