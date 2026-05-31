@@ -36,7 +36,14 @@ watch(resendCooldown, (newValue) => {
 const getFingerPrint = () => {
     let fp = localStorage.getItem('device_fp');
     if (!fp) {
-        fp = crypto.randomUUID();
+        if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+            fp = crypto.randomUUID();
+        } else {
+            fp = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
         localStorage.setItem('device_fp', fp);
     }
     return fp;
