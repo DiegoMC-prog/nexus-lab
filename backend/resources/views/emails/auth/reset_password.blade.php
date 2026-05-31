@@ -33,16 +33,16 @@
             color: #334155;
         }
 
-        .otp-code {
-            font-size: 42px;
-            font-weight: bold;
-            letter-spacing: 10px;
-            color: #0d9488;
-            margin: 20px 0;
-            padding: 15px;
-            border: 2px dashed #0d9488;
-            border-radius: 8px;
+        .button {
             display: inline-block;
+            background-color: #0d9488;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            margin: 20px 0;
         }
 
         .footer {
@@ -59,6 +59,13 @@
             color: #ef4444;
             margin-top: 20px;
         }
+        
+        .link-text {
+            font-size: 12px;
+            color: #64748b;
+            word-break: break-all;
+            margin-top: 20px;
+        }
     </style>
 </head>
 
@@ -70,15 +77,20 @@
         </div>
 
         <div class="content">
-            <h2 style="margin-top: 0;">Verificación de Inicio de Sesión</h2>
-            <p>Se ha detectado un inicio de sesión desde un <strong>nuevo dispositivo</strong>.</p>
-            <p>Para continuar, ingresa el siguiente código de un solo uso (OTP):</p>
+            <h2 style="margin-top: 0;">Restablecer Contraseña</h2>
+            <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta.</p>
+            <p>Haz clic en el siguiente botón para continuar con el proceso:</p>
 
-            <div class="otp-code">{{ $otp_code }}</div>
+            <a href="{{ $reset_url }}" class="button" style="color: #ffffff;">Restablecer mi contraseña</a>
 
             <p class="warning">
-                Este código expirará en <strong>15 minutos</strong><br>
-                Si tú no solicitaste este acceso, te recomendamos cambiar tu contraseña de inmediato.
+                Este enlace expirará en <strong>60 minutos</strong>.<br>
+                Si tú no solicitaste este cambio, puedes ignorar este correo de forma segura.
+            </p>
+            
+            <p class="link-text">
+                Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:<br>
+                <a href="{{ $reset_url }}" style="color: #0d9488;">{{ $reset_url }}</a>
             </p>
         </div>
 

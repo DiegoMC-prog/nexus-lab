@@ -28,9 +28,9 @@ class PasswordResetController extends Controller
 
         $frontendUrl = env('FRONTEND_URL') . "/reset-password?token={$token}&email={$request->email}";
 
-        Mail::raw("Para restablecer tu contraseña, haz clic en el siguiente enlace: {$frontendUrl}", function ($message) use ($request) {
+        Mail::send('emails.auth.reset_password', ['reset_url' => $frontendUrl], function ($message) use ($request) {
             $message->to($request->email)
-                ->subject('Restablecer Contraseña - Control de Equipos');
+                ->subject('Restablecer Contraseña - NEXUSLAB');
         });
 
         return response()->json(['message' => 'Te hemos enviado un correo con el enlace de recuperación.']);
