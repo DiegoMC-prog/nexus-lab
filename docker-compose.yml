@@ -21,6 +21,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    image: nexus-lab-backend:latest
     container_name: nexus-backend
     restart: unless-stopped
     # ports:
@@ -39,9 +40,7 @@ services:
       - database
 
   reverb:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: nexus-lab-backend:latest
     container_name: nexus-reverb
     restart: unless-stopped
     command: php artisan reverb:start --host=0.0.0.0 --port=8080
@@ -59,9 +58,7 @@ services:
       - database
 
   queue:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: nexus-lab-backend:latest
     container_name: nexus-queue
     restart: unless-stopped
     command: php artisan queue:work
