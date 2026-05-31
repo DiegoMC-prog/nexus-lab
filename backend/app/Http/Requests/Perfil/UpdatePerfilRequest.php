@@ -26,7 +26,6 @@ class UpdatePerfilRequest extends FormRequest
                 Rule::unique('perfil', 'user_id')->ignore($id),
             ],
             'telefono' => 'sometimes|required|string|max:50',
-            'departamento' => 'nullable|string|max:255',
         ];
     }
 }

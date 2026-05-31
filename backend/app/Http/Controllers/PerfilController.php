@@ -17,7 +17,7 @@ class PerfilController extends Controller
         // Obtener o crear el perfil asociado al usuario autenticado
         $perfil = Perfil::firstOrCreate(
             ['user_id' => $user->id],
-            ['telefono' => '', 'departamento' => '']
+            ['telefono' => '']
         );
 
         $perfil->load('usuario');
@@ -40,7 +40,6 @@ class PerfilController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'telefono' => 'required|string|max:50',
-            'departamento' => 'nullable|string|max:255',
             'password' => 'nullable|string|min:8|confirmed',
         ]);
 
@@ -57,12 +56,11 @@ class PerfilController extends Controller
         // Actualizar datos complementarios de perfil
         $perfil = Perfil::firstOrCreate(
             ['user_id' => $user->id],
-            ['telefono' => '', 'departamento' => '']
+            ['telefono' => '']
         );
 
         $perfil->update([
             'telefono' => $validated['telefono'],
-            'departamento' => $validated['departamento'] ?? null,
         ]);
 
         $perfil->load('usuario');

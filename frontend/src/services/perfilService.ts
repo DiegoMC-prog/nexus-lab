@@ -4,7 +4,6 @@ export interface Perfil {
     id: number;
     user_id: number;
     telefono: string;
-    departamento: string | null;
     created_at: string;
     usuario?: {
         id: number;
@@ -18,7 +17,6 @@ export interface PerfilPayload {
     name: string;
     email: string;
     telefono: string;
-    departamento?: string | null;
     password?: string;
     password_confirmation?: string;
 }

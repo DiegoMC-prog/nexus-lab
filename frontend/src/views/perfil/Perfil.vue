@@ -24,7 +24,6 @@ const form = ref<PerfilPayload>({
     name: '',
     email: '',
     telefono: '',
-    departamento: '',
     password: '',
     password_confirmation: ''
 });
@@ -38,7 +37,6 @@ const loadProfile = async () => {
             form.value.name = perfil.usuario?.name || '';
             form.value.email = perfil.usuario?.email || '';
             form.value.telefono = perfil.telefono || '';
-            form.value.departamento = perfil.departamento || '';
         }
     } catch (error) {
         console.error('Error al cargar datos del perfil:', error);
@@ -57,7 +55,6 @@ const handleSaveProfile = async () => {
             name: form.value.name,
             email: form.value.email,
             telefono: form.value.telefono,
-            departamento: form.value.departamento || null,
             password: form.value.password || undefined,
             password_confirmation: form.value.password_confirmation || undefined
         });
@@ -245,21 +242,6 @@ onMounted(() => {
                             </div>
                             <p v-if="validationErrors?.telefono" class="text-xs text-red-500 mt-1 block">
                                 {{ validationErrors.telefono[0] }}
-                            </p>
-                        </div>
-
-                        <!-- Departamento -->
-                        <div class="space-y-1.5">
-                            <label class="text-gray-700 text-xs font-semibold uppercase tracking-wider block">Departamento / Oficina</label>
-                            <div class="relative">
-                                <Building2 class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                <input v-model="form.departamento" type="text" placeholder="Ej. Laboratorio B - Redes"
-                                    :disabled="isSaving"
-                                    class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 text-gray-900 placeholder:text-gray-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm transition-all"
-                                    :class="{ 'border-red-500 focus:ring-red-500': validationErrors?.departamento }" />
-                            </div>
-                            <p v-if="validationErrors?.departamento" class="text-xs text-red-500 mt-1 block">
-                                {{ validationErrors.departamento[0] }}
                             </p>
                         </div>
                     </div>

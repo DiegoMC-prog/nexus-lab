@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
         // 1 Administrador
         $user = User::factory()->create([
             'name' => 'Admin User',
-            'email' => 'test@example.com',
+            'email' => 'diegomarca736@gmail.com',
             'password' => Hash::make('password'),
         ]);
         $user->assignRole('admin');
@@ -25,7 +25,7 @@ class UserSeeder extends Seeder
         // 3 Docentes (1 base + 2 extras)
         $docenteBase = User::factory()->create([
             'name' => 'Docente Principal',
-            'email' => 'docente@gmail.com',
+            'email' => 'rmcu987@gmail.com',
             'password' => Hash::make('docente123'),
         ]);
         $docenteBase->assignRole('docente');
