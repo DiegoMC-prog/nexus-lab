@@ -16,7 +16,6 @@ class StorePerfilRequest extends FormRequest
         return [
             'user_id' => 'required|integer|unique:perfil,user_id|exists:users,id',
             'telefono' => 'required|string|max:50',
-            'departamento' => 'nullable|string|max:255',
         ];
     }
 }

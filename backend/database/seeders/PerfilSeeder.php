@@ -20,25 +20,12 @@ class PerfilSeeder extends Seeder
             return;
         }
 
-        $departamentos = [
-            'La Paz',
-            'Cochabamba',
-            'Santa Cruz',
-            'Oruro',
-            'Potosí',
-            'Tarija',
-            'Chuquisaca',
-            'Beni',
-            'Pando',
-        ];
-
         // Crear un perfil para cada usuario
         $index = 1;
         foreach ($usuarios as $usuario) {
             Perfil::create([
                 'user_id' => $usuario->id,
                 'telefono' => '7' . rand(1000000, 9999999), // Teléfonos celulares realistas en Bolivia (comienzan con 7)
-                'departamento' => $departamentos[($index - 1) % count($departamentos)],
             ]);
             $index++;
         }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Table;
 use Illuminate\Database\Eloquent\Model;
 
 #[Table('perfil')]
-#[Fillable('user_id', 'telefono', 'departamento')]
+#[Fillable('user_id', 'telefono')]
 class Perfil extends Model
 {
     public function usuario()

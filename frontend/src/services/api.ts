@@ -32,6 +32,23 @@ api.interceptors.response.use(
             router.push('/login');          
             return Promise.reject(error);
         }
+
+        // Si el backend rechaza por falta de permisos (403 Forbidden)
+        if (error.response && error.response.status === 403) {
+            // Sincronizamos los permisos en segundo plano por si cambiaron en BD
+            authStore.refreshPermisos();
+
+            // Redireccionamos a su vista base según el rol
+            const role = authStore.user?.role || 'admin';
+            let homeRoute = '/';
+            if (role === 'docente' || role === 'estudiante') homeRoute = '/horarios';
+            
+            if (router.currentRoute.value.path !== homeRoute) {
+                router.push(homeRoute);
+            }
+            return Promise.reject(error);
+        }
+
         // Escenario 1: El servidor está APAGADO (No hay respuesta del host)
         if (!error.response || error.code === 'ERR_NETWORK') {
             errorStore.setApiDown(true);

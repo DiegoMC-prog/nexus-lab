@@ -6,9 +6,22 @@ use App\Http\Requests\Laboratorio\StoreLaboratorioRequest;
 use App\Http\Requests\Laboratorio\UpdateLaboratorioRequest;
 use App\Models\Laboratorio;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Override;
 
-class LaboratorioController extends Controller
+class LaboratorioController extends Controller implements HasMiddleware
 {
+    #[Override]
+    public static function middleware()
+    {
+        return [
+            new Middleware('permission:laboratorios.ver', only: ['index', 'show', 'obtenerPcsHuerfanas']),
+            new Middleware('permission:laboratorios.crear', only: ['store']),
+            new Middleware('permission:laboratorios.editar', only: ['update', 'vincularPcs']),
+            new Middleware('permission:laboratorios.eliminar', only: ['destroy']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */

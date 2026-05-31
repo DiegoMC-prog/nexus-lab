@@ -55,9 +55,13 @@ const handleSubmit = async () => {
         } else {
             error.value = 'Credenciales incorrectas. Intente nuevamente.';
         }
-    } catch (err) {
-        error.value = 'Error al iniciar sesión. Intente más tarde.';
-        console.error("Error al logearse", err);
+    } catch (err: any) {
+        if (err.response && err.response.data && err.response.data.message) {
+            error.value = err.response.data.message;
+        } else {
+            error.value = 'Error al iniciar sesión. Intente más tarde.';
+        }
+        //console.error("Error al logearse", err);
     } finally {
         loading.value = false;
     }

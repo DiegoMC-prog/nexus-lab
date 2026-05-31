@@ -6,9 +6,22 @@ use App\Http\Requests\Horario\StoreHorarioRequest;
 use App\Http\Requests\Horario\UpdateHorarioRequest;
 use App\Models\Horario;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
+use Override;
 
-class HorarioController extends Controller
+class HorarioController extends Controller implements HasMiddleware
 {
+    #[Override]
+    public static function middleware()
+    {
+        return [
+            new Middleware('permission:horarios.ver', only: ['index', 'show', 'horarioFormData']),
+            new Middleware('permission:horarios.crear', only: ['store']),
+            new Middleware('permission:horarios.editar', only: ['update']),
+            new Middleware('permission:horarios.eliminar', only: ['destroy']),
+        ];
+    }
     /**
      * Display a listing of the resource.
      */
