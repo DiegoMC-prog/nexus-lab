@@ -24,6 +24,18 @@ class AuthController extends Controller
             ], 404);
         }
 
+        if ($user->estado === 'inactivo') {
+            return response()->json([
+                'message' => 'Su cuenta está inactiva. Por favor, contacte al administrador.',
+            ], 403);
+        }
+
+        if ($user->estado === 'bloqueado por administrador' || $user->estado === 'bloqueado') {
+            return response()->json([
+                'message' => 'Su cuenta ha sido bloqueada por el administrador.',
+            ], 403);
+        }
+
         if (!Hash::check($credenciales->password, $user->password)) {
             return response()->json([
                 'message' => 'Credenciales incorrectas.',
@@ -78,6 +90,18 @@ class AuthController extends Controller
 
         if (!Hash::check($validado->otp_code, $user->otp_code) || now()->isAfter($user->otp_expires_at)) {
             return response()->json(['message' => 'Código incorrecto o expirado'], 422);
+        }
+
+        if ($user->estado === 'inactivo') {
+            return response()->json([
+                'message' => 'Su cuenta está inactiva. Por favor, contacte al administrador.',
+            ], 403);
+        }
+
+        if ($user->estado === 'bloqueado por administrador' || $user->estado === 'bloqueado') {
+            return response()->json([
+                'message' => 'Su cuenta ha sido bloqueada por el administrador.',
+            ], 403);
         }
 
         $user->dispositivos()->create([
