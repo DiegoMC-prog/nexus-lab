@@ -15,4 +15,15 @@ class Carrera extends Model
     {
         return $this->hasMany(Materia::class, 'carrera_id');
     }
+
+    protected static function booted()
+    {
+        static::deleting(function ($carrera) {
+            $carrera->materias()->delete();
+        });
+
+        static::restoring(function ($carrera) {
+            $carrera->materias()->withTrashed()->restore();
+        });
+    }
 }

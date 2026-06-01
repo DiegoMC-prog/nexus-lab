@@ -84,4 +84,29 @@ class User extends Authenticatable
     {
         return $this->hasOne(BiometriaFacial::class, 'user_id');
     }
+
+    protected static function booted()
+    {
+        static::deleting(function ($user) {
+            if ($user->perfil) {
+                $user->perfil()->delete();
+            }
+            if ($user->biometriaVocal) {
+                $user->biometriaVocal()->delete();
+            }
+            if ($user->biometriaFacial) {
+                $user->biometriaFacial()->delete();
+            }
+            $user->dispositivos()->delete();
+            $user->horariosDocente()->delete();
+        });
+
+        static::restoring(function ($user) {
+            $user->perfil()->withTrashed()->restore();
+            $user->dispositivos()->withTrashed()->restore();
+            $user->biometriaVocal()->withTrashed()->restore();
+            $user->biometriaFacial()->withTrashed()->restore();
+            $user->horariosDocente()->withTrashed()->restore();
+        });
+    }
 }

@@ -20,4 +20,17 @@ class Laboratorio extends Model
     {
         return $this->hasMany(Horario::class, 'laboratorio_id');
     }
+
+    protected static function booted()
+    {
+        static::deleting(function ($laboratorio) {
+            $laboratorio->estaciones()->delete();
+            $laboratorio->horarios()->delete();
+        });
+
+        static::restoring(function ($laboratorio) {
+            $laboratorio->estaciones()->withTrashed()->restore();
+            $laboratorio->horarios()->withTrashed()->restore();
+        });
+    }
 }

@@ -25,4 +25,15 @@ class Materia extends Model
     {
         return $this->hasMany(Grupo::class, 'materia_id');
     }
+
+    protected static function booted()
+    {
+        static::deleting(function ($materia) {
+            $materia->grupos()->delete();
+        });
+
+        static::restoring(function ($materia) {
+            $materia->grupos()->withTrashed()->restore();
+        });
+    }
 }

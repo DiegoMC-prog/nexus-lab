@@ -17,4 +17,15 @@ class SemestreAcademico extends Model
     {
         return $this->hasMany(Materia::class, 'semestre_academico_id');
     }
+
+    protected static function booted()
+    {
+        static::deleting(function ($semestre) {
+            $semestre->materias()->delete();
+        });
+
+        static::restoring(function ($semestre) {
+            $semestre->materias()->withTrashed()->restore();
+        });
+    }
 }

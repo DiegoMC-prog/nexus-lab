@@ -58,4 +58,23 @@ class Estacion extends Model
     {
         return $this->hasMany(LogsComando::class, 'estacion_id');
     }
+
+    protected static function booted()
+    {
+        static::deleting(function ($estacion) {
+            if ($estacion->Hardware) {
+                $estacion->Hardware()->delete();
+            }
+            $estacion->telemetrias()->delete();
+            $estacion->alertas()->delete();
+            $estacion->logsComandos()->delete();
+        });
+
+        static::restoring(function ($estacion) {
+            $estacion->Hardware()->withTrashed()->restore();
+            $estacion->telemetrias()->withTrashed()->restore();
+            $estacion->alertas()->withTrashed()->restore();
+            $estacion->logsComandos()->withTrashed()->restore();
+        });
+    }
 }

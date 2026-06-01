@@ -26,4 +26,15 @@ class Grupo extends Model
     {
         return $this->hasMany(Horario::class, 'grupo_id');
     }
+
+    protected static function booted()
+    {
+        static::deleting(function ($grupo) {
+            $grupo->horarios()->delete();
+        });
+
+        static::restoring(function ($grupo) {
+            $grupo->horarios()->withTrashed()->restore();
+        });
+    }
 }
