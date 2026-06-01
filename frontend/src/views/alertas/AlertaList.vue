@@ -5,6 +5,9 @@ import {
     RefreshCw, ShieldAlert, Cpu, Database, Thermometer, Wifi 
 } from '@lucide/vue';
 import { alertaService } from '@/services/alertaService';
+import { useAuthStore } from '@/stores/auth';
+
+const authStore = useAuthStore();
 
 // Componentes del Sistema
 import BasePagination from '@/components/BasePagination.vue';
@@ -252,27 +255,45 @@ onMounted(() => {
                 </div>
 
                 <div class="flex items-center gap-2 pt-4 border-t border-gray-100 mt-5">
-                    <button 
-                        v-if="alerta.estado === 'pendiente'"
-                        @click="handleResolveAlerta(alerta)"
-                        :disabled="isSavingId === alerta.id"
-                        class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 text-xs font-semibold rounded-lg text-white shadow-sm transition-colors cursor-pointer gap-1"
-                    >
-                        <Loader2 v-if="isSavingId === alerta.id" class="w-3.5 h-3.5 animate-spin" />
-                        <CheckCircle2 v-else class="w-3.5 h-3.5" />
-                        <span>Marcar Resuelta</span>
-                    </button>
-                    
-                    <span 
-                        v-else
-                        class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-250 text-xs font-semibold rounded-lg gap-1 uppercase select-none"
-                    >
-                        <CheckCircle2 class="w-3.5 h-3.5" />
-                        <span>Atendida</span>
-                    </span>
+                    <template v-if="authStore.can('alertas.editar')">
+                        <button 
+                            v-if="alerta.estado === 'pendiente'"
+                            @click="handleResolveAlerta(alerta)"
+                            :disabled="isSavingId === alerta.id"
+                            class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-50 text-xs font-semibold rounded-lg text-white shadow-sm transition-colors cursor-pointer gap-1"
+                        >
+                            <Loader2 v-if="isSavingId === alerta.id" class="w-3.5 h-3.5 animate-spin" />
+                            <CheckCircle2 v-else class="w-3.5 h-3.5" />
+                            <span>Marcar Resuelta</span>
+                        </button>
+                        
+                        <span 
+                            v-else
+                            class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-250 text-xs font-semibold rounded-lg gap-1 uppercase select-none"
+                        >
+                            <CheckCircle2 class="w-3.5 h-3.5" />
+                            <span>Atendida</span>
+                        </span>
+                    </template>
+                    <template v-else>
+                        <span 
+                            v-if="alerta.estado === 'pendiente'"
+                            class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-red-50 text-red-700 border border-red-250 text-xs font-semibold rounded-lg gap-1 uppercase select-none"
+                        >
+                            <AlertOctagon class="w-3.5 h-3.5" />
+                            <span>Pendiente</span>
+                        </span>
+                        <span 
+                            v-else
+                            class="flex-1 inline-flex items-center justify-center px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-250 text-xs font-semibold rounded-lg gap-1 uppercase select-none"
+                        >
+                            <CheckCircle2 class="w-3.5 h-3.5" />
+                            <span>Atendida</span>
+                        </span>
+                    </template>
 
-                    <button @click="handleDeleteAlerta(alerta.id)"
-                        class="inline-flex items-center justify-center p-1.5 border border-gray-250 hover:bg-red-50 hover:border-red-200 hover:text-red-600 rounded-lg text-gray-400 transition-colors cursor-pointer">
+                    <button v-if="authStore.can('alertas.eliminar')" @click="handleDeleteAlerta(alerta.id)"
+                        class="inline-flex items-center justify-center p-1.5 border border-gray-250 hover:bg-red-50 hover:border-red-200 hover:text-red-600 rounded-lg text-gray-400 transition-colors cursor-pointer ml-auto">
                         <Trash2 class="w-4 h-4" />
                     </button>
                 </div>

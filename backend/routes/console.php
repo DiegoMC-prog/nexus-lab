@@ -9,4 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 // Programar la simulación de fondo de Nexus Lab para ejecutarse automáticamente cada minuto
-Schedule::command('nexus:simulate-scheduler')->everyMinute();
+Schedule::command('nexus:simulate-scheduler')->everyTenSeconds();

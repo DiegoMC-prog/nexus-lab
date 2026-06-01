@@ -170,6 +170,9 @@ class SimuladorActividadService
             })
             ->get();
 
+        // Obtener configuraciones de alertas activas
+        $configsAlertas = \App\Models\ConfigAlerta::where('activo', true)->get();
+
         foreach ($estaciones as $estacion) {
             $isBlocked = $estacion->estado === 'bloqueado';
             $estudianteId = $estacion->estudiante_actual_id;
@@ -215,14 +218,62 @@ class SimuladorActividadService
             }
 
             // Generar un nuevo registro de telemetría remota realista
+            $cargaCpu = rand(5, 100);
+            $usoRam = rand(1600, 15800); // 1.6GB a 15.8GB
+            $tempCpu = rand(40, 85);
+            $usoDisco = rand(15, 95);
+            $latenciaRed = rand(4, 150);
+
             LogsTelemetria::create([
                 'estacion_id' => $estacion->id,
-                'carga_cpu' => rand(5, 95),
-                'uso_ram_mb' => rand(1600, 7800), // 1.6GB a 7.8GB
-                'temp_cpu' => rand(40, 78),
-                'uso_disco' => rand(15, 80),
-                'latencia_red' => rand(4, 75)
+                'carga_cpu' => $cargaCpu,
+                'uso_ram_mb' => $usoRam,
+                'temp_cpu' => $tempCpu,
+                'uso_disco' => $usoDisco,
+                'latencia_red' => $latenciaRed
             ]);
+
+            // Evaluar reglas de ConfigAlerta y generar Alertas reales
+            $valoresTelemetria = [
+                'carga_cpu' => $cargaCpu,
+                'uso_ram_mb' => $usoRam,
+                'temp_cpu' => $tempCpu,
+                'uso_disco' => $usoDisco,
+                'latencia_red' => $latenciaRed,
+                'procesos_no_autorizados' => 0
+            ];
+
+            foreach ($configsAlertas as $config) {
+                $metricaKey = strtolower(trim($config->metrica));
+                $valorActual = $valoresTelemetria[$metricaKey] ?? null;
+
+                if ($valorActual !== null) {
+                    $trigger = false;
+                    switch($config->operador) {
+                        case '>': $trigger = $valorActual > $config->valor_umbral; break;
+                        case '<': $trigger = $valorActual < $config->valor_umbral; break;
+                        case '>=': $trigger = $valorActual >= $config->valor_umbral; break;
+                        case '<=': $trigger = $valorActual <= $config->valor_umbral; break;
+                        case '=': $trigger = $valorActual == $config->valor_umbral; break;
+                    }
+
+                    if ($trigger) {
+                        $alertaExistente = \App\Models\Alerta::where('estacion_id', $estacion->id)
+                            ->where('config_alerta_id', $config->id)
+                            ->where('estado', 'pendiente')
+                            ->exists();
+
+                        if (!$alertaExistente) {
+                            \App\Models\Alerta::create([
+                                'estacion_id' => $estacion->id,
+                                'config_alerta_id' => $config->id,
+                                'valor_actual' => $valorActual,
+                                'estado' => 'pendiente'
+                            ]);
+                        }
+                    }
+                }
+            }
 
             // Simular Alertas de Infracción (10% de probabilidad por minuto para estaciones activas no bloqueadas)
             if (!$isBlocked && $estudianteId !== null && $restricciones->isNotEmpty() && rand(1, 100) <= 10) {

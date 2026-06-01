@@ -212,6 +212,9 @@ class SimulateLiveClass extends Command
             })
             ->get();
 
+        // Obtener configuraciones de alertas activas
+        $configsAlertas = \App\Models\ConfigAlerta::where('activo', true)->get();
+
         // Mapeo de rutas para el simulador de ejecutables realistas
         $rutasEjecutables = [
             'steam.exe' => 'C:\\Program Files (x86)\\Steam\\steam.exe',
@@ -250,18 +253,63 @@ class SimulateLiveClass extends Command
                     ]);
                 }
 
-                // Generar telemetría realista
-                $cargaCpu = rand(5, 95);
-                $usoRam = rand(1500, 7600); // 1.5GB a 7.6GB
+                // Generar telemetría realista pero que pueda disparar las alertas
+                $cargaCpu = rand(5, 100);
+                $usoRam = rand(1500, 15500); // 1.5GB a 15.5GB para poder pasar el umbral de 14GB
+                $tempCpu = rand(40, 85);
+                $usoDisco = rand(15, 95);
+                $latenciaRed = rand(5, 150);
                 
                 LogsTelemetria::create([
                     'estacion_id' => $estacion->id,
                     'carga_cpu' => $cargaCpu,
                     'uso_ram_mb' => $usoRam,
-                    'temp_cpu' => rand(40, 78),
-                    'uso_disco' => rand(15, 80),
-                    'latencia_red' => rand(5, 85)
+                    'temp_cpu' => $tempCpu,
+                    'uso_disco' => $usoDisco,
+                    'latencia_red' => $latenciaRed
                 ]);
+
+                // 6.5 Evaluar reglas de ConfigAlerta y generar Alertas reales
+                $valoresTelemetria = [
+                    'carga_cpu' => $cargaCpu,
+                    'uso_ram_mb' => $usoRam,
+                    'temp_cpu' => $tempCpu,
+                    'uso_disco' => $usoDisco,
+                    'latencia_red' => $latenciaRed,
+                    'procesos_no_autorizados' => 0 // Esto se maneja en el paso 7, pero lo ponemos por default
+                ];
+
+                foreach ($configsAlertas as $config) {
+                    $metricaKey = strtolower(trim($config->metrica));
+                    $valorActual = $valoresTelemetria[$metricaKey] ?? null;
+
+                    if ($valorActual !== null) {
+                        $trigger = false;
+                        switch($config->operador) {
+                            case '>': $trigger = $valorActual > $config->valor_umbral; break;
+                            case '<': $trigger = $valorActual < $config->valor_umbral; break;
+                            case '>=': $trigger = $valorActual >= $config->valor_umbral; break;
+                            case '<=': $trigger = $valorActual <= $config->valor_umbral; break;
+                            case '=': $trigger = $valorActual == $config->valor_umbral; break;
+                        }
+
+                        if ($trigger) {
+                            $alertaExistente = \App\Models\Alerta::where('estacion_id', $estacion->id)
+                                ->where('config_alerta_id', $config->id)
+                                ->where('estado', 'pendiente')
+                                ->exists();
+
+                            if (!$alertaExistente) {
+                                \App\Models\Alerta::create([
+                                    'estacion_id' => $estacion->id,
+                                    'config_alerta_id' => $config->id,
+                                    'valor_actual' => $valorActual,
+                                    'estado' => 'pendiente'
+                                ]);
+                            }
+                        }
+                    }
+                }
             }
 
             $this->line("  -> Telemetría y estado de red actualizados para {$estaciones->count()} PCs.");

@@ -29,6 +29,28 @@ class AlertasController extends Controller implements HasMiddleware
     {
         $query = Alerta::query()->with(['estacion', 'configuracionAlerta']);
 
+        // Filtro automático para docentes (ven solo las alertas de su laboratorio activo en este momento)
+        $user = $request->user();
+        if ($user && $user->hasRole('docente') && !$user->hasRole('administrador')) {
+            $currentTime = date('H:i:s');
+            $hoyNum = date('N');
+            
+            $claseActiva = \App\Models\Horario::where('docente_id', $user->id)
+                ->where('dia_semana', $hoyNum)
+                ->where('hora_inicio', '<=', $currentTime)
+                ->where('hora_fin', '>=', $currentTime)
+                ->first();
+
+            if ($claseActiva) {
+                $query->whereHas('estacion', function ($q) use ($claseActiva) {
+                    $q->where('laboratorio_id', $claseActiva->laboratorio_id);
+                });
+            } else {
+                // Si no hay clase activa, no mostrar alertas de otros laboratorios
+                $query->where('id', 0);
+            }
+        }
+
         $query->when($request->filled('estacion_id'), function ($q) use ($request) {
             $q->where('estacion_id', $request->estacion_id);
         });

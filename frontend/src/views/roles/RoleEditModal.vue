@@ -47,6 +47,7 @@ watch(
 
 const permissionsByCategory = computed(() => {
     return props.permissions.reduce((acc, permission) => {
+        if (permission.id === 'alertas.crear') return acc; // Ocultamos la creación manual porque es automática
         const category = permission.category;
         if (!acc[category]) {
             acc[category] = [];
