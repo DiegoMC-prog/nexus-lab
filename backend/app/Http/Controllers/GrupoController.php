@@ -253,6 +253,7 @@ class GrupoController extends Controller implements HasMiddleware
 
         $estudiantes = \App\Models\User::query()
             ->role('estudiante')
+            ->where('estado', 'activo')
             ->where('name', 'ILIKE', "%{$q}%")
             ->select('id', 'name', 'email')
             ->limit(10)

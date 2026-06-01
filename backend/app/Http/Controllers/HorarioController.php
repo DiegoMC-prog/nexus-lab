@@ -201,12 +201,14 @@ class HorarioController extends Controller implements HasMiddleware
     public function horarioFormData()
     {
         $laboratorios = \App\Models\Laboratorio::query()
+            ->where('activo', true)
             ->select(['id', 'nombre'])
             ->latest()
             ->get();
 
         $docentes = \App\Models\User::query()
             ->role('docente')
+            ->where('estado', 'activo')
             ->select(['id', 'name as nombre'])
             ->latest()
             ->get();
