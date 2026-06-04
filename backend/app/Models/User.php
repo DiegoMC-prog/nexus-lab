@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Spatie\Permission\Traits\HasRoles;
 
 #[Fillable(['name', 'email', 'password', 'otp_code', 'otp_expires_at', 'estado'])]
@@ -19,6 +20,40 @@ use Spatie\Permission\Traits\HasRoles;
 #[Appends(['role', 'permisos'])]
 class User extends Authenticatable
 {
+    /**
+     * Normalize an email address (specifically for gmail/googlemail domains).
+     */
+    public static function normalizeEmail(?string $email): ?string
+    {
+        if (empty($email)) {
+            return null;
+        }
+
+        $email = trim(strtolower($email));
+        $parts = explode('@', $email);
+        if (count($parts) !== 2) {
+            return $email;
+        }
+
+        [$username, $domain] = $parts;
+
+        if ($domain === 'gmail.com' || $domain === 'googlemail.com') {
+            $username = explode('+', $username)[0];
+            $username = str_replace('.', '', $username);
+        }
+
+        return $username . '@' . $domain;
+    }
+
+    /**
+     * Attribute mutator for email.
+     */
+    protected function email(): Attribute
+    {
+        return Attribute::make(
+            set: fn (?string $value) => self::normalizeEmail($value),
+        );
+    }
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, HasRoles, HasApiTokens, SoftDeletes;
 
