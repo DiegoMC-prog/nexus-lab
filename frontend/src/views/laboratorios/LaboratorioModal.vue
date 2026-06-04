@@ -21,7 +21,8 @@ const formData = ref<LaboratorioFormData>({
     nombre: '',
     pabellon: '',
     piso: '',
-    activo: true
+    activo: true,
+    capacidad: 30
 });
 
 // Vigilar la apertura del modal para cargar o limpiar el formulario
@@ -32,10 +33,11 @@ watch(() => props.show, (isShown) => {
                 nombre: props.lab.nombre,
                 pabellon: props.lab.pabellon,
                 piso: props.lab.piso,
-                activo: props.lab.activo
+                activo: props.lab.activo,
+                capacidad: props.lab.capacidad ?? 30
             };
         } else {
-            formData.value = { nombre: '', pabellon: '', piso: '', activo: true };
+            formData.value = { nombre: '', pabellon: '', piso: '', activo: true, capacidad: 30 };
         }
     }
 });
@@ -126,6 +128,25 @@ const handleSave = () => {
                             </p>
                         </div>
                     </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-gray-700 text-xs font-semibold uppercase tracking-wider">
+                            Aforo Máximo
+                            <span class="normal-case text-gray-400 font-normal ml-1">(número de PCs)</span>
+                        </label>
+                        <div class="relative">
+                            <input v-model.number="formData.capacidad" type="number" min="1" max="500"
+                                :disabled="loading" placeholder="Ej. 30"
+                                class="w-full px-3.5 py-2 border border-gray-200 rounded-lg focus:outline-hidden focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 text-gray-900 bg-white text-sm shadow-2xs transition-all placeholder:text-gray-400 disabled:bg-gray-50 disabled:text-gray-400"
+                                :class="{ 'border-red-500 focus:ring-red-500': validationErrors?.capacidad }" />
+                            <p v-if="validationErrors?.capacidad" class="text-xs text-red-500 mt-1 block">
+                                {{ validationErrors.capacidad[0] }}
+                            </p>
+                            <p v-if="lab?.estaciones_count !== undefined" class="text-xs text-gray-400 mt-1">
+                                {{ lab.estaciones_count }} estaciones actualmente registradas.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-2.5">
@@ -135,7 +156,7 @@ const handleSave = () => {
                     </button>
 
                     <button @click="handleSave"
-                        :disabled="!formData.nombre || !formData.pabellon || !formData.piso || loading"
+                        :disabled="!formData.nombre || !formData.pabellon || !formData.piso || !formData.capacidad || loading"
                         class="px-4 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all text-sm font-medium shadow-sm cursor-pointer flex items-center gap-2">
                         <Loader2 v-if="loading" class="w-4 h-4 animate-spin" />
                         {{ loading ? 'Guardando...' : (lab ? 'Guardar Cambios' : 'Crear Laboratorio') }}

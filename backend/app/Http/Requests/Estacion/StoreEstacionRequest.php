@@ -34,12 +34,27 @@ class StoreEstacionRequest extends FormRequest
             'laboratorio_id' => 'nullable|integer|exists:laboratorios,id',
             'estudiante_actual_id' => 'nullable|integer|exists:users,id',
             'uuid' => 'required|uuid' . ($estacionId ? '' : '|unique:estaciones,uuid'),
-            'hostname' => 'required|string|min:3|max:100',
-            'direccion_mac' => 'required|string' . ($estacionId ? '' : '|unique:estaciones,direccion_mac'),
+            'hostname' => 'required|string|max:100',
+            'direccion_mac' => [
+                'required',
+                'string',
+                'regex:/^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$/',
+                $estacionId ? '' : 'unique:estaciones,direccion_mac'
+            ],
             'direccion_ip' => 'required|ip|max:20' . ($estacionId ? '' : '|unique:estaciones,direccion_ip'),
             'so_info' => 'required|string',
             'estado' => 'required|string',
             'version_agente' => 'required|string',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'direccion_mac.regex' => 'El formato de la dirección MAC no es válido. Use el formato XX:XX:XX:XX:XX:XX o XX-XX-XX-XX-XX-XX.',
+            'direccion_mac.unique' => 'Esta dirección MAC ya está registrada en el sistema.',
+            'direccion_ip.unique' => 'Esta dirección IP ya está registrada en el sistema.',
+            'uuid.unique' => 'Esta estación ya está registrada en el sistema.',
         ];
     }
 }

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable('id', 'nombre', 'pabellon', 'piso', 'activo')]
+#[Fillable('id', 'nombre', 'pabellon', 'piso', 'activo', 'capacidad')]
 class Laboratorio extends Model
 {
     use SoftDeletes;

@@ -56,6 +56,7 @@ class UpdateEstacionRequest extends FormRequest
             'direccion_mac' => [
                 'required',
                 'string',
+                'regex:/^([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}$/',
                 Rule::unique('estaciones', 'direccion_mac')
                     ->ignore($estacionId)
                     ->whereNull('deleted_at'),
@@ -90,6 +91,17 @@ class UpdateEstacionRequest extends FormRequest
                 'string',
                 'max:50',
             ],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'direccion_mac.regex' => 'El formato de la dirección MAC no es válido. Use el formato XX:XX:XX:XX:XX:XX o XX-XX-XX-XX-XX-XX.',
+            'direccion_mac.unique' => 'Esta dirección MAC ya está registrada en otro equipo.',
+            'direccion_ip.unique' => 'Esta dirección IP ya está registrada en otro equipo.',
+            'uuid.unique' => 'El UUID ya pertenece a otra estación registrada.',
+            'estado.in' => 'El estado indicado no es válido.',
         ];
     }
 }

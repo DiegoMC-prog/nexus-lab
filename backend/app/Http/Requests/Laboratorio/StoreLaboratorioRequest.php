@@ -35,6 +35,7 @@ class StoreLaboratorioRequest extends FormRequest
             'pabellon' => 'required|string|max:255',
             'piso' => 'required|string|max:100',
             'activo' => 'required|boolean',
+            'capacidad' => 'sometimes|integer|min:1|max:500',
         ];
     }
 
@@ -51,6 +52,10 @@ class StoreLaboratorioRequest extends FormRequest
 
             'activo.required' => 'El estado activo es obligatorio.',
             'activo.boolean' => 'El campo activo debe ser verdadero o falso.',
+
+            'capacidad.integer' => 'La capacidad debe ser un número entero.',
+            'capacidad.min' => 'La capacidad mínima es 1 puesto.',
+            'capacidad.max' => 'La capacidad máxima es 500 puestos.',
         ];
     }
 }

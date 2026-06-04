@@ -129,7 +129,7 @@ const visibleSections = computed(() => {
                 </div>
             </div>
             <div class="flex flex-col gap-0.5 text-[11px] text-gray-600 px-2 font-medium">
-                <p>Sistema v1.1.0</p>
+                <p>Sistema v1.1.1</p>
                 <p>© 2026 NexusLab Manager</p>
             </div>
         </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, onUnmounted } from 'vue';
 import { 
     Search, Trash2, Laptop, Building2, 
     Loader2, AlertTriangle, Monitor, ShieldCheck, 
@@ -133,10 +133,26 @@ const formatLastConnection = (dateString: string) => {
     }
 };
 
+let channel: any = null;
+
 // Carga Inicial
 onMounted(async () => {
     await fetchLaboratorios();
     await fetchEstaciones();
+
+    if (window.Echo) {
+        channel = window.Echo.channel('estaciones.global');
+        channel.listen('.EstacionesActualizadas', () => {
+            console.log('[WebSocket] Estaciones actualizadas por el scheduler de fondo. Recargando lista...');
+            fetchEstaciones();
+        });
+    }
+});
+
+onUnmounted(() => {
+    if (channel && window.Echo) {
+        window.Echo.leave('estaciones.global');
+    }
 });
 </script>
 
@@ -199,7 +215,7 @@ onMounted(async () => {
                         <option value="all">Todos los estados</option>
                         <option value="activa">Activa / Disponible</option>
                         <option value="bloqueado">Kiosko / Bloqueado</option>
-                        <option value="pendiente">Pendiente de Aprobación</option>
+                        <!-- <option value="pendiente">Pendiente de Aprobación</option> -->
                         <option value="mantenimiento">Mantenimiento</option>
                         <option value="inactiva">Inactiva</option>
                     </select>
