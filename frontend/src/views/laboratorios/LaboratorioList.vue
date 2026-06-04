@@ -165,9 +165,13 @@ const handleDeleteLaboratorio = async () => {
         } else {
             await fetchLaboratorios();
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error al eliminar el laboratorio:', error);
-        toast.error('Error', 'Hubo un problema al intentar eliminar el laboratorio.');
+        if (error.response && error.response.status === 422) {
+            toast.warning('No se pudo eliminar', error.response.data.message || 'El laboratorio tiene datos asociados.');
+        } else {
+            toast.error('Error', 'Hubo un problema al intentar eliminar el laboratorio.');
+        }
     }
 };
 </script>

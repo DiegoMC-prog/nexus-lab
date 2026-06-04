@@ -39,7 +39,6 @@ class UpdateLaboratorioRequest extends FormRequest
         ];
     }
 
-    #[Override]
     public function messages()
     {
         return [
@@ -47,5 +46,21 @@ class UpdateLaboratorioRequest extends FormRequest
 
             'activo.boolean' => 'El campo activo debe ser verdadero o falso.',
         ];
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $laboratorio = is_object($this->route('laboratorio')) ? $this->route('laboratorio') : \App\Models\Laboratorio::find($this->route('laboratorio'));
+            if (!$laboratorio) return;
+
+            // If we are deactivating
+            if ($this->has('activo') && !$this->input('activo') && $laboratorio->activo) {
+                // Check if there are active horarios
+                if ($laboratorio->horarios()->exists()) {
+                    $validator->errors()->add('activo', 'No se puede desactivar el laboratorio porque tiene horarios de materias asignados.');
+                }
+            }
+        });
     }
 }

@@ -133,6 +133,13 @@ class LaboratorioController extends Controller implements HasMiddleware
      */
     public function destroy(Laboratorio $laboratorio)
     {
+        if ($laboratorio->horarios()->exists()) {
+            return response()->json([
+                'message' => 'El laboratorio tiene horarios asignados.',
+                'errors' => ['laboratorio' => ['No se puede eliminar el laboratorio porque tiene horarios de materias asignados.']]
+            ], 422);
+        }
+
         $laboratorio->delete();
 
         return response()->json([
