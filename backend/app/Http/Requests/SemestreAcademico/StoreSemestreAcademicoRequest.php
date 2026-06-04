@@ -24,6 +24,15 @@ class StoreSemestreAcademicoRequest extends FormRequest
     {
         return [
             'nombre' => 'required|string|min:3|unique:semestres_academicos,nombre',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'fecha_fin.after_or_equal' => 'La fecha de fin no puede ser anterior a la fecha de inicio.',
         ];
     }
 }

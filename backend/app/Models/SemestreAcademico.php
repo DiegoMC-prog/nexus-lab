@@ -8,10 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 #[Table('semestres_academicos')]
-#[Fillable('nombre')]
+#[Fillable('nombre', 'fecha_inicio', 'fecha_fin', 'estado')]
 class SemestreAcademico extends Model
 {
     use SoftDeletes;
+
+    public function isClosed(): bool
+    {
+        return $this->estado === 'cerrado';
+    }
 
     public function materias()
     {

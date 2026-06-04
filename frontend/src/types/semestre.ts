@@ -3,10 +3,15 @@ import type { PaginatedResponse } from "./api";
 export interface Semestre {
     id: number;
     nombre: string;
+    fecha_inicio: string;
+    fecha_fin: string;
+    estado: 'activo' | 'cerrado';
 }
 
 export interface SemestreFormData {
     nombre: string;
+    fecha_inicio: string;
+    fecha_fin: string;
 }
 
 export interface GetSemestresResponse {

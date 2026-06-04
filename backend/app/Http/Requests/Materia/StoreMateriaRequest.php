@@ -30,4 +30,17 @@ class StoreMateriaRequest extends FormRequest
             'creditos' => 'nullable|integer',
         ];
     }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $semestreId = $this->input('semestre_academico_id');
+            if ($semestreId) {
+                $semestre = \App\Models\SemestreAcademico::find($semestreId);
+                if ($semestre && $semestre->isClosed()) {
+                    $validator->errors()->add('semestre_academico_id', 'No se puede crear una materia en un semestre cerrado.');
+                }
+            }
+        });
+    }
 }

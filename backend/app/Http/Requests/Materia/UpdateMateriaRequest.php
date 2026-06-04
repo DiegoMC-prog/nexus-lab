@@ -32,4 +32,25 @@ class UpdateMateriaRequest extends FormRequest
             'creditos' => 'nullable|integer',
         ];
     }
+
+    public function withValidator($validator)
+    {
+        $materia = $this->route('materia');
+
+        $validator->after(function ($validator) use ($materia) {
+            // Check original semester
+            if ($materia && $materia->semestreAcademico && $materia->semestreAcademico->isClosed()) {
+                $validator->errors()->add('semestre_academico_id', 'No se puede editar una materia que pertenece a un semestre cerrado.');
+            }
+
+            // Check new semester (if changing)
+            $newSemestreId = $this->input('semestre_academico_id');
+            if ($newSemestreId && (!$materia || $newSemestreId != $materia->semestre_academico_id)) {
+                $newSemestre = \App\Models\SemestreAcademico::find($newSemestreId);
+                if ($newSemestre && $newSemestre->isClosed()) {
+                    $validator->errors()->add('semestre_academico_id', 'No se puede mover la materia a un semestre cerrado.');
+                }
+            }
+        });
+    }
 }

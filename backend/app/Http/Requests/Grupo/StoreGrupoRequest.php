@@ -63,4 +63,17 @@ class StoreGrupoRequest extends FormRequest
             'cupo_maximo.min' => 'El cupo mínimo permitido debe ser de al menos 1 estudiante.',
         ];
     }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $materiaId = $this->input('materia_id');
+            if ($materiaId) {
+                $materia = \App\Models\Materia::with('semestreAcademico')->find($materiaId);
+                if ($materia && $materia->semestreAcademico && $materia->semestreAcademico->isClosed()) {
+                    $validator->errors()->add('materia_id', 'No se puede crear un grupo en un semestre cerrado.');
+                }
+            }
+        });
+    }
 }

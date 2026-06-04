@@ -33,8 +33,16 @@ class SemestreAcademicoController extends Controller implements HasMiddleware
             $search = $request->search;
 
             return $q->where(function ($subQuery) use ($search) {
-                $subQuery->where('nombre', 'ILIKE', $search);
+                $subQuery->where('nombre', 'ILIKE', '%' . $search . '%');
             });
+        });
+
+        $query->when($request->filled('fecha_inicio'), function ($q) use ($request) {
+            $q->where('fecha_inicio', '>=', $request->fecha_inicio);
+        });
+
+        $query->when($request->filled('fecha_fin'), function ($q) use ($request) {
+            $q->where('fecha_fin', '<=', $request->fecha_fin);
         });
 
         $semestresAcademicos = $query->latest()->paginate(10);
@@ -43,6 +51,9 @@ class SemestreAcademicoController extends Controller implements HasMiddleware
             return [
                 'id' => $semestreAcademico->id,
                 'nombre' => $semestreAcademico->nombre,
+                'fecha_inicio' => $semestreAcademico->fecha_inicio,
+                'fecha_fin' => $semestreAcademico->fecha_fin,
+                'estado' => $semestreAcademico->estado,
             ];
         });
 
@@ -60,6 +71,8 @@ class SemestreAcademicoController extends Controller implements HasMiddleware
 
         $semestreAcademico = SemestreAcademico::create([
             'nombre' => $data->nombre,
+            'fecha_inicio' => $data->fecha_inicio,
+            'fecha_fin' => $data->fecha_fin,
         ]);
 
         return response()->json([
@@ -87,6 +100,8 @@ class SemestreAcademicoController extends Controller implements HasMiddleware
 
         $semestre->update([
             'nombre' => $data->nombre,
+            'fecha_inicio' => $data->fecha_inicio,
+            'fecha_fin' => $data->fecha_fin,
         ]);
 
         $semestre->refresh();
@@ -102,10 +117,40 @@ class SemestreAcademicoController extends Controller implements HasMiddleware
      */
     public function destroy(SemestreAcademico $semestre)
     {
+        if ($semestre->isClosed()) {
+            return response()->json([
+                'message' => 'No se puede eliminar un semestre que ya ha sido cerrado.',
+            ], 422);
+        }
+
         $semestre->delete(null);
 
         return response()->json([
             'message' => 'Semestre eliminado exitosamente',
+        ], 200);
+    }
+
+    /**
+     * Close the specified resource.
+     */
+    public function close(SemestreAcademico $semestre)
+    {
+        if ($semestre->isClosed()) {
+            return response()->json([
+                'message' => 'El semestre ya se encuentra cerrado.',
+                'errors' => [
+                    'estado' => ['El semestre ya se encuentra cerrado.']
+                ]
+            ], 422);
+        }
+
+        $semestre->update([
+            'estado' => 'cerrado'
+        ]);
+
+        return response()->json([
+            'message' => 'Semestre Académico cerrado correctamente',
+            'semestre_academico' => $semestre,
         ], 200);
     }
 }

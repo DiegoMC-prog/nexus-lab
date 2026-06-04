@@ -58,6 +58,13 @@ class StoreHorarioRequest extends FormRequest
     public function withValidator($validator)
     {
         $validator->after(function ($validator) {
+            $grupoId = $this->input('grupo_id');
+            if ($grupoId) {
+                $grupo = \App\Models\Grupo::with('materia.semestreAcademico')->find($grupoId);
+                if ($grupo && $grupo->materia && $grupo->materia->semestreAcademico && $grupo->materia->semestreAcademico->isClosed()) {
+                    $validator->errors()->add('grupo_id', 'No se puede crear un horario en un semestre cerrado.');
+                }
+            }
 
             if ($validator->errors()->any()) {
                 return;
