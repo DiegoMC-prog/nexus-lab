@@ -138,7 +138,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="p-6 space-y-6 relative">
+    <div class="p-4 md:p-6 space-y-4 md:space-y-6 relative">
         <div v-if="isLoading"
             class="absolute inset-0 bg-white/40 backdrop-blur-xs z-50 flex items-center justify-center min-h-100 rounded-xl transition-all">
             <div class="bg-white p-4 rounded-xl shadow-lg border border-gray-100 flex items-center gap-3">
@@ -158,7 +158,7 @@ onMounted(() => {
                 </p>
             </div>
             <button v-if="authStore.can('carreras.crear')" @click="openCreateModal"
-                class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm gap-2 transition-colors text-sm">
+                class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm gap-2 transition-colors text-sm w-full sm:w-auto">
                 <Plus class="w-4 h-4" />
                 Nueva Carrera
             </button>

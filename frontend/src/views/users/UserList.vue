@@ -188,19 +188,19 @@ const getStatusConfig = (estado: string) => {
 </script>
 
 <template>
-    <div class="p-8 space-y-6">
+    <div class="p-4 md:p-8 space-y-4 md:space-y-6">
         <!-- Encabezado -->
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-semibold text-gray-900 mb-2">Gestión de Usuarios</h1>
-                <p class="text-gray-600">{{ totalUsers }} usuarios registrados en el sistema</p>
+                <h1 class="text-2xl sm:text-3xl font-semibold text-gray-900 mb-1 sm:mb-2">Gestión de Usuarios</h1>
+                <p class="text-sm sm:text-base text-gray-600">{{ totalUsers }} usuarios registrados en el sistema</p>
             </div>
             <!-- Si está inicializando, muestra un esqueleto animado -->
             <div v-if="isInitializing" class="w-32 h-10 bg-gray-200 animate-pulse rounded-md"></div>
 
             <!-- Si ya terminó, evalúa el permiso real -->
             <button v-else-if="authStore.can('usuarios.crear')" @click="openCreateDialog"
-                class="bg-blue-600 hover:bg-blue-700 text-white gap-2 flex items-center px-4 py-2 rounded-md transition-colors text-sm font-medium shadow-sm cursor-pointer">
+                class="bg-blue-600 hover:bg-blue-700 text-white gap-2 flex items-center px-4 py-2 rounded-md transition-colors text-sm font-medium shadow-sm cursor-pointer w-full sm:w-auto justify-center">
                 <Plus class="w-4 h-4" />
                 Nuevo Usuario
             </button>

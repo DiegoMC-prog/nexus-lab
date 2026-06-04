@@ -27,4 +27,12 @@ class StoreCarreraRequest extends FormRequest
             'codigo' => 'required|string|min:3|unique:carreras,codigo',
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'codigo.unique' => 'El código de carrera ya pertenece a otra facultad.',
+            'nombre.unique' => 'Ya existe una carrera con ese nombre.',
+        ];
+    }
 }

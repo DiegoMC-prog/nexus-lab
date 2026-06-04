@@ -37,7 +37,7 @@ class CarreraController extends Controller implements HasMiddleware
             });
         });
 
-        $carreras = $query->latest()->paginate(10);
+        $carreras = $query->orderBy('nombre', 'asc')->paginate(10);   
 
         $carreras->through(function ($carrera) {
             return [
