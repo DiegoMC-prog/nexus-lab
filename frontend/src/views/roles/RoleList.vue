@@ -5,7 +5,9 @@ import type { ApiRolesResponse, Permission, Role } from '@/types/role';
 
 import RoleEditModal from './RoleEditModal.vue';
 import { roleService } from '@/services/roleService';
+import { useToast } from '@/composables/useToast';
 
+const toast = useToast();
 const rawApiData = ref<ApiRolesResponse>({ roles: [] });
 const allSystemPermissions = ref<string[]>([]);
 const loading = ref(true);
@@ -121,9 +123,10 @@ const saveRolePermissions = async (updatedPermissionsIds: string[]) => {
 
         // Cerramos el modal ÚNICAMENTE si la base de datos se actualizó con éxito
         isEditDialogOpen.value = false;
+        toast.success('Permisos actualizados', 'Los permisos del rol han sido guardados correctamente.');
     } catch (error) {
         console.error("Error al guardar los nuevos permisos en el servidor:", error);
-        alert("Ocurrió un error en el servidor. Los cambios no se guardaron.");
+        toast.error('Error', 'Ocurrió un error en el servidor. Los cambios no se guardaron.');
         // Al lanzar el error, no cerramos el modal, manteniendo los checkboxes listos para reintentar
     } finally {
         isSavingModal.value = false; // Apagamos la carga pase lo que pase

@@ -4,6 +4,7 @@ import { RouterView } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useErrorStore } from '@/stores/errorStore';
 import ConnectionError from '@/components/ConnectionError.vue';
+import ToastContainer from '@/components/ToastContainer.vue';
 import api from '@/services/api';
 import type { User } from './types/auth';
 
@@ -34,5 +35,6 @@ onMounted(async () => {
   <template v-else>
     <ConnectionError v-if="errorStore.isApiDown || errorStore.isDatabaseDown" />
     <RouterView v-else />
+    <ToastContainer />
   </template>
 </template>

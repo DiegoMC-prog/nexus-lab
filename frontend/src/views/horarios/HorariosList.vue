@@ -10,7 +10,9 @@ import BasePagination from '@/components/BasePagination.vue';
 import HorarioModal from './HorarioModal.vue';
 import HorarioDeleteModal from './HorarioDeleteModal.vue';
 import HorarioCalendarView from './HorarioCalendarView.vue';
+import { useToast } from '@/composables/useToast';
 
+const toast = useToast();
 // Auth Store para verificar permisos del usuario
 const authStore = useAuthStore();
 // isDocente se mantiene para compatibilidad con filtros del backend (query param)
@@ -174,8 +176,10 @@ const handleSaveHorario = async (formData: HorarioFormData) => {
     try {
         if (selectedHorario.value) {
             await horarioService.actualizarHorario(selectedHorario.value.id, formData);
+            toast.success('Horario actualizado', 'El horario ha sido actualizado correctamente.');
         } else {
             await horarioService.crearHorario(formData);
+            toast.success('Horario creado', 'El horario ha sido registrado correctamente.');
         }
         isFormModalOpen.value = false;
         fetchHorarios();
@@ -184,6 +188,9 @@ const handleSaveHorario = async (formData: HorarioFormData) => {
         // Si hay errores de validación de Laravel (422), los inyectamos en el modal
         if (error.response && error.response.status === 422 && error.response.data.errors) {
             validationErrors.value = error.response.data.errors;
+            toast.warning('Errores de validación', 'Por favor revisa los campos del formulario.');
+        } else {
+            toast.error('Error', 'No se pudo guardar la información del horario.');
         }
     } finally {
         isSaving.value = false;
@@ -196,6 +203,7 @@ const handleConfirmDelete = async () => {
     try {
         await horarioService.eliminarHorario(selectedHorario.value.id);
         isDeleteModalOpen.value = false;
+        toast.success('Horario eliminado', 'El horario ha sido eliminado correctamente.');
 
         // Regresar de página si borramos el único de una sección
         if (horarios.value.length === 1 && currentPage.value > 1) {
@@ -205,6 +213,7 @@ const handleConfirmDelete = async () => {
         }
     } catch (error) {
         console.error('Error al eliminar horario:', error);
+        toast.error('Error', 'Hubo un problema al intentar eliminar el horario.');
     } finally {
         isSaving.value = false;
     }

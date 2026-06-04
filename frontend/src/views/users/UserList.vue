@@ -13,13 +13,15 @@ import UserDeleteModal from './UserDeleteModal.vue';
 import BasePagination from '@/components/BasePagination.vue';
 import { useAuthStore } from '@/stores/auth';
 import { getLaravelValidationErrors } from '@/utils/errorHandler';
+import { useToast } from '@/composables/useToast';
+
+const toast = useToast();
 
 // Configuración visual para Roles
 const rolesConfig: Record<string, { displayName: string; color: string }> = {
     admin: { displayName: 'Administrador', color: '#ef4444' },
     docente: { displayName: 'Docente', color: '#f59e0b' },
     estudiante: { displayName: 'Estudiante', color: '#3b82f6' },
-    mantenimiento: { displayName: 'Mantenimiento', color: '#10b981' }
 };
 
 // --- ESTADO REACTIVO DE LA API ---
@@ -132,9 +134,11 @@ const handleSaveUser = async (formData: any) => {
         if (selectedUser.value?.id) {
             // Edición: Enviamos el ID y los nuevos datos (el rol viaja como ID numérico)
             await userService.actualizarUser(selectedUser.value.id, formData);
+            toast.success('Usuario actualizado', 'Los datos del usuario se han actualizado correctamente.');
         } else {
             // Creación
             await userService.crearUser(formData);
+            toast.success('Usuario creado', 'El usuario se ha registrado correctamente.');
         }
         isFormDialogOpen.value = false;
         selectedUser.value = null;
@@ -143,6 +147,9 @@ const handleSaveUser = async (formData: any) => {
         console.error('Error al guardar el usuario:', error);
         if (error.response && error.response.status === 422) {
             validationErrors.value = getLaravelValidationErrors(error);
+            toast.warning('Errores de validación', 'Por favor revisa los campos del formulario.');
+        } else {
+            toast.error('Error', 'No se pudo guardar la información del usuario.');
         }
     } finally {
         isSaving.value = false
@@ -155,9 +162,11 @@ const handleDeleteUser = async () => {
         await userService.eliminarUser(selectedUser.value.id);
         isDeleteDialogOpen.value = false;
         selectedUser.value = null;
+        toast.success('Usuario eliminado', 'El usuario ha sido eliminado correctamente del sistema.');
         await fetchUsers(); // Recargar la tabla
     } catch (error) {
         console.error('Error al eliminar el usuario:', error);
+        toast.error('Error', 'Hubo un problema al intentar eliminar al usuario.');
     }
 };
 
