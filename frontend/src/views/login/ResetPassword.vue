@@ -82,11 +82,13 @@ const handleSubmit = async () => {
             setTimeout(() => {
                 router.push({ name: 'login' });
             }, 2500);
+        }
+    } catch (err: any) {
+        if (err.response && err.response.data && err.response.data.message) {
+            error.value = err.response.data.message;
         } else {
             error.value = 'No se pudo actualizar la contraseña. Intente de nuevo.';
         }
-    } catch (err) {
-        error.value = 'Error en el servidor al actualizar la contraseña.';
     } finally {
         loading.value = false;
     }

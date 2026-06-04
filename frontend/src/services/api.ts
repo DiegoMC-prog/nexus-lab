@@ -29,22 +29,26 @@ api.interceptors.response.use(
         if (error.response && error.response.status === 401) {
             errorStore.clearErrors();
             authStore.clearLocalSession(); 
-            router.push('/login');          
+            if (router.currentRoute.value.path !== '/login') {
+                router.push('/login');
+            }
             return Promise.reject(error);
         }
 
         // Si el backend rechaza por falta de permisos (403 Forbidden)
         if (error.response && error.response.status === 403) {
-            // Sincronizamos los permisos en segundo plano por si cambiaron en BD
-            authStore.refreshPermisos();
+            if (authStore.isAuthenticated) {
+                // Sincronizamos los permisos en segundo plano por si cambiaron en BD
+                authStore.refreshPermisos();
 
-            // Redireccionamos a su vista base según el rol
-            const role = authStore.user?.role || 'admin';
-            let homeRoute = '/';
-            if (role === 'docente' || role === 'estudiante') homeRoute = '/horarios';
-            
-            if (router.currentRoute.value.path !== homeRoute) {
-                router.push(homeRoute);
+                // Redireccionamos a su vista base según el rol
+                const role = authStore.user?.role || 'admin';
+                let homeRoute = '/';
+                if (role === 'docente' || role === 'estudiante') homeRoute = '/horarios';
+                
+                if (router.currentRoute.value.path !== homeRoute) {
+                    router.push(homeRoute);
+                }
             }
             return Promise.reject(error);
         }

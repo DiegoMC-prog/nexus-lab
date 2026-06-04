@@ -27,17 +27,16 @@ const handleSubmit = async () => {
         if (result) {
             success.value = true;
 
-            // 3. CAMBIO CLAVE: Ya no redirigimos a /verify-otp.
-            // Como el usuario debe ir a abrir su correo, lo ideal es regresarlo al /login 
-            // después de unos segundos para que la app quede lista.
             setTimeout(() => {
                 router.push({ name: 'login' });
-            }, 4000); // 4 segundos para que alcance a leer el recuadro verde
-        } else {
-            error.value = 'No se encontró una cuenta con este correo electrónico.';
+            }, 4000); 
         }
-    } catch (err) {
-        error.value = 'Error al enviar el enlace. Intente más tarde.';
+    } catch (err: any) {
+        if (err.response && err.response.data && err.response.data.message) {
+            error.value = err.response.data.message;
+        } else {
+            error.value = 'Error al enviar el enlace. Intente más tarde.';
+        }
         console.error("Error en forgot-password:", err);
     } finally {
         loading.value = false;

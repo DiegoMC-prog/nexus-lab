@@ -16,6 +16,16 @@ class PasswordResetController extends Controller
     {
         $request->validate(['email' => 'required|email|exists:users,email']);
 
+        $user = User::where('email', $request->email)->first();
+
+        if ($user->estado === 'inactivo') {
+            return response()->json(['message' => 'Su cuenta está inactiva. Por favor, contacte al administrador.'], 403);
+        }
+
+        if (in_array($user->estado, ['bloqueado', 'bloqueado por administrador'])) {
+            return response()->json(['message' => 'Su cuenta ha sido bloqueada por el administrador.'], 403);
+        }
+
         $token = Str::random(64);
 
         DB::table('password_reset_tokens')->updateOrInsert(
@@ -44,6 +54,16 @@ class PasswordResetController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
+        $user = User::query()->where('email', $request->email)->first();
+
+        if ($user->estado === 'inactivo') {
+            return response()->json(['message' => 'Su cuenta está inactiva. Por favor, contacte al administrador.'], 403);
+        }
+
+        if (in_array($user->estado, ['bloqueado', 'bloqueado por administrador'])) {
+            return response()->json(['message' => 'Su cuenta ha sido bloqueada por el administrador.'], 403);
+        }
+
         $tokenRecord = DB::table('password_reset_tokens')
             ->where('email', $request->email)
             ->where('token', $request->token)
@@ -53,7 +73,6 @@ class PasswordResetController extends Controller
             return response()->json(['message' => 'El enlace de recuperación es inválido o ha expirado.'], 400);
         }
 
-        $user = User::query()->where('email', $request->email)->first();
         $user->password = Hash::make($request->password);
         $user->save();
 

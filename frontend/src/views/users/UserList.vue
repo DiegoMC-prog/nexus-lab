@@ -128,6 +128,12 @@ const openDeleteDialog = (user: User) => {
 };
 
 const handleSaveUser = async (formData: any) => {
+    // Si estamos editando (selectedUser tiene id), pedimos confirmación antes de proceder
+    if (selectedUser.value?.id) {
+        const confirmar = window.confirm('¿Está seguro de que desea modificar los datos de este usuario? Si cambia el estado a inactivo, se revocarán sus accesos.');
+        if (!confirmar) return;
+    }
+
     isSaving.value = true;
     validationErrors.value = undefined;
     try {

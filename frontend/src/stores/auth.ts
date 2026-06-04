@@ -50,28 +50,16 @@ export const useAuthStore = defineStore('auth', {
         },
 
         async resetPassword(email: string): Promise<boolean> {
-            try {
-                this.loginEmail = email; // Respaldamos el email en el estado
-
-                // Le pega a tu endpoint de Laravel para enviar el correo
-                await authService.sendResetLink(email);
-
-                return true;
-            } catch (error) {
-                console.error("Error al solicitar el enlace de recuperación:", error);
-                return false;
-            }
+            this.loginEmail = email; // Respaldamos el email en el estado
+            
+            // Si ocurre un error de Axios (ej. 403 por inactivo), queremos que el componente lo atrape
+            await authService.sendResetLink(email);
+            return true;
         },
 
-        async updatePassword(payload: any): Promise<boolean> {
-            try {
-                // Enlazamos al servicio de Axios pasándole email, token, password y password_confirmation
-                await authService.updatePassword(payload);
-                return true;
-            } catch (error) {
-                console.error("Error al actualizar la contraseña en el servidor:", error);
-                return false;
-            }
+        async updatePassword(payload: any) {
+            await authService.updatePassword(payload);
+            return { success: true };
         },
 
         async checkResetToken(token: string, email: string): Promise<boolean> {

@@ -124,6 +124,17 @@ class UserController extends Controller implements HasMiddleware
     {
         $data = $request->validated();
 
+        $adminRole = Role::where('name', 'admin')->first();
+
+        if ($adminRole && $user->hasRole('admin') && (int)$data['role'] !== $adminRole->id) {
+            $adminCount = User::role('admin')->count();
+            if ($adminCount <= 1) {
+                return response()->json([
+                    'message' => 'No se puede eliminar el único administrador del sistema.'
+                ], 400);
+            }
+        }
+
         if ($data['email'] !== $user->email) {
             $tempPassword = Str::random(10);
 
@@ -135,6 +146,11 @@ class UserController extends Controller implements HasMiddleware
         $user->syncRoles([$data['role']]);
 
         $user->refresh();
+
+        // Revocar tokens si el usuario es desactivado o bloqueado
+        if (in_array($user->estado, ['inactivo', 'bloqueado'])) {
+            $user->tokens()->delete();
+        }
 
         if (isset($tempPassword)) {
             Mail::to($user->email)->send(new TemporaryPasswordMail($user, $tempPassword));
@@ -157,7 +173,18 @@ class UserController extends Controller implements HasMiddleware
      */
     public function destroy(User $user)
     {
-        $user->delete(null);
+        if ($user->hasRole('admin')) {
+            $adminCount = User::role('admin')->count();
+            if ($adminCount <= 1) {
+                return response()->json([
+                    'message' => 'No se puede eliminar el único administrador del sistema.'
+                ], 400);
+            }
+        }
+
+        // Revocar tokens antes de eliminar
+        $user->tokens()->delete();
+        $user->delete();
 
         return response()->json([
             "message" => 'Usuario eliminado correctamente',
