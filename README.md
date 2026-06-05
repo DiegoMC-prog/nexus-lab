@@ -92,3 +92,6 @@ docker compose up --build -d
 - [x] Diferentes vistas/permisos para ADMIN y USER
 - [x] Cierre de sesión (Revocación de tokens)
 - [x] Despliegue en la nube accesible por HTTP/HTTPS
+
+## 6. Url del despliegue
+[URL DEL SISTEMA NUBE](http://2.25.152.141)
