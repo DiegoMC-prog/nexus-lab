@@ -1,6 +1,6 @@
-# NexusLab - Plataforma de Gestión IoT y Académica
+# NexusLab - SISTEMA DISTRUIBUIDO PARA LA GESTION Y MONITOREO DE LABORATORIOS INFORMATICOS EN TIEMPO REAL
 
-Este repositorio contiene el código fuente completo de NexusLab, una plataforma avanzada para la gestión de laboratorios, control IoT y administración académica.
+Este repositorio contiene el código fuente completo de NexusLab, un SISTEMA DISTRUIBUIDO PARA LA GESTION Y MONITOREO DE LABORATORIOS INFORMATICOS EN TIEMPO REAL.
 
 ## 1. Diagrama de Arquitectura (Docker)
 
