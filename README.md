@@ -63,13 +63,13 @@ Los siguientes usuarios han sido inyectados mediante los Seeders y están dispon
 | Administrador | `admin@prueba.com` | `Admin123!` | **`JBSWY3DPEHPK3PXP`** | <img src="./docs/qr-admin.svg" width="100" /> |
 | Usuario regular | `user@prueba.com` | `User123!` | **`KNRW24TMMJQXEZLJ`** | <img src="./docs/qr-user.svg" width="100" /> |
 
-> **Nota para el evaluador:** Puede escanear los Códigos QR directamente con su aplicación Authenticator (Google Authenticator, Authy, etc) o introducir los secretos manualmente. No es necesario que los usuarios marquen un equipo de confianza preconfigurado en la base de datos para esta prueba.
+> **Nota para el Inge:** Puede escanear los Códigos QR directamente con su aplicación Authenticator (Google Authenticator, Authy, etc) o introducir los secretos manualmente. No es necesario que los usuarios marquen un equipo de confianza preconfigurado en la base de datos para esta prueba.
 
 ## 4. Versiones
 
 | Tag      | Estado         | Cambios                                   |
 |----------|----------------|-------------------------------------------|
-| v1.2.0   | ✅ Producción  | 2FA (TOTP) + equipo de confianza + despliegue cloud |
+| v1.2.1   | ✅ Producción  | 2FA (TOTP) + equipo de confianza + despliegue cloud |
 | v1.2.0   | ✅ Estable     | primera version de produccion  |
 | v1.1.1   | ✅ Estable     | Arreglo de idioma de mensajes    |
 | v1.1.0   | ✅ Estable     | Correcion de QA                         |
