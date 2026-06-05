@@ -11,6 +11,20 @@ RUN npm ci
 # Copiar el resto del código fuente
 COPY . .
 
+# Argumentos de construcción para Vite
+ARG VITE_API_URL
+ARG VITE_REVERB_APP_KEY
+ARG VITE_REVERB_HOST
+ARG VITE_REVERB_PORT
+ARG VITE_REVERB_SCHEME
+
+# Pasarlos a variables de entorno para que Vite los tome al compilar
+ENV VITE_API_URL=$VITE_API_URL
+ENV VITE_REVERB_APP_KEY=$VITE_REVERB_APP_KEY
+ENV VITE_REVERB_HOST=$VITE_REVERB_HOST
+ENV VITE_REVERB_PORT=$VITE_REVERB_PORT
+ENV VITE_REVERB_SCHEME=$VITE_REVERB_SCHEME
+
 # Compilar la aplicación Vue
 RUN npm run build
 
