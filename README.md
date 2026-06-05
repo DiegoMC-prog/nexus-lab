@@ -70,8 +70,9 @@ Los siguientes usuarios han sido inyectados mediante los Seeders y están dispon
 | Tag      | Estado         | Cambios                                   |
 |----------|----------------|-------------------------------------------|
 | v1.2.0   | ✅ Producción  | 2FA (TOTP) + equipo de confianza + despliegue cloud |
-| v1.1.0   | ✅ Estable     | Login en dos pasos (Arquitectura base)    |
-| v1.0.0   | ✅ Estable     | JWT + CRUD básico                         |
+| v1.2.0   | ✅ Estable     | primera version de produccion  |
+| v1.1.1   | ✅ Estable     | Arreglo de idioma de mensajes    |
+| v1.1.0   | ✅ Estable     | Correcion de QA                         |
 
 Para probar una versión específica:
 ```bash
