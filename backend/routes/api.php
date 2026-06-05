@@ -95,6 +95,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('carreras', CarreraController::class);
 
     //modulo semestres
+    Route::post('semestres/{semestre}/close', [SemestreAcademicoController::class, 'close']);
     Route::apiResource('semestres', SemestreAcademicoController::class);
 
     //modulo materia

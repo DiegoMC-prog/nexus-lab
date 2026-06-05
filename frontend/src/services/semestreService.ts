@@ -3,7 +3,7 @@ import api from "./api";
 import type { GetSemestresResponse, Semestre, SemestreFormData, SemestreResponse, MessageResponse } from '@/types/semestre';
 
 export const semestreService = {
-    async getSemestres(params?: { search?: string; page?: string }): Promise<PaginatedResponse<Semestre>> {
+    async getSemestres(params?: { search?: string; page?: string; fecha_inicio?: string; fecha_fin?: string }): Promise<PaginatedResponse<Semestre>> {
         const response = await api.get<GetSemestresResponse>('/semestres', { params });
         return response.data.semestres_academicos;
     },
@@ -20,6 +20,11 @@ export const semestreService = {
 
     async eliminarSemestre(id: number | string): Promise<MessageResponse> {
         const response = await api.delete<MessageResponse>(`/semestres/${id}`);
+        return response.data;
+    },
+
+    async cerrarSemestre(id: number | string): Promise<SemestreResponse> {
+        const response = await api.post<SemestreResponse>(`/semestres/${id}/close`);
         return response.data;
     }
 }

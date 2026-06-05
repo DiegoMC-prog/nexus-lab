@@ -13,13 +13,15 @@ import UserDeleteModal from './UserDeleteModal.vue';
 import BasePagination from '@/components/BasePagination.vue';
 import { useAuthStore } from '@/stores/auth';
 import { getLaravelValidationErrors } from '@/utils/errorHandler';
+import { useToast } from '@/composables/useToast';
+
+const toast = useToast();
 
 // Configuración visual para Roles
 const rolesConfig: Record<string, { displayName: string; color: string }> = {
     admin: { displayName: 'Administrador', color: '#ef4444' },
     docente: { displayName: 'Docente', color: '#f59e0b' },
     estudiante: { displayName: 'Estudiante', color: '#3b82f6' },
-    mantenimiento: { displayName: 'Mantenimiento', color: '#10b981' }
 };
 
 // --- ESTADO REACTIVO DE LA API ---
@@ -126,15 +128,23 @@ const openDeleteDialog = (user: User) => {
 };
 
 const handleSaveUser = async (formData: any) => {
+    // Si estamos editando (selectedUser tiene id), pedimos confirmación antes de proceder
+    if (selectedUser.value?.id) {
+        const confirmar = window.confirm('¿Está seguro de que desea modificar los datos de este usuario? Si cambia el estado a inactivo, se revocarán sus accesos.');
+        if (!confirmar) return;
+    }
+
     isSaving.value = true;
     validationErrors.value = undefined;
     try {
         if (selectedUser.value?.id) {
             // Edición: Enviamos el ID y los nuevos datos (el rol viaja como ID numérico)
             await userService.actualizarUser(selectedUser.value.id, formData);
+            toast.success('Usuario actualizado', 'Los datos del usuario se han actualizado correctamente.');
         } else {
             // Creación
             await userService.crearUser(formData);
+            toast.success('Usuario creado', 'El usuario se ha registrado correctamente.');
         }
         isFormDialogOpen.value = false;
         selectedUser.value = null;
@@ -143,6 +153,9 @@ const handleSaveUser = async (formData: any) => {
         console.error('Error al guardar el usuario:', error);
         if (error.response && error.response.status === 422) {
             validationErrors.value = getLaravelValidationErrors(error);
+            toast.warning('Errores de validación', 'Por favor revisa los campos del formulario.');
+        } else {
+            toast.error('Error', 'No se pudo guardar la información del usuario.');
         }
     } finally {
         isSaving.value = false
@@ -155,9 +168,11 @@ const handleDeleteUser = async () => {
         await userService.eliminarUser(selectedUser.value.id);
         isDeleteDialogOpen.value = false;
         selectedUser.value = null;
+        toast.success('Usuario eliminado', 'El usuario ha sido eliminado correctamente del sistema.');
         await fetchUsers(); // Recargar la tabla
     } catch (error) {
         console.error('Error al eliminar el usuario:', error);
+        toast.error('Error', 'Hubo un problema al intentar eliminar al usuario.');
     }
 };
 
@@ -173,19 +188,19 @@ const getStatusConfig = (estado: string) => {
 </script>
 
 <template>
-    <div class="p-8 space-y-6">
+    <div class="p-4 md:p-8 space-y-4 md:space-y-6">
         <!-- Encabezado -->
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-semibold text-gray-900 mb-2">Gestión de Usuarios</h1>
-                <p class="text-gray-600">{{ totalUsers }} usuarios registrados en el sistema</p>
+                <h1 class="text-2xl sm:text-3xl font-semibold text-gray-900 mb-1 sm:mb-2">Gestión de Usuarios</h1>
+                <p class="text-sm sm:text-base text-gray-600">{{ totalUsers }} usuarios registrados en el sistema</p>
             </div>
             <!-- Si está inicializando, muestra un esqueleto animado -->
             <div v-if="isInitializing" class="w-32 h-10 bg-gray-200 animate-pulse rounded-md"></div>
 
             <!-- Si ya terminó, evalúa el permiso real -->
             <button v-else-if="authStore.can('usuarios.crear')" @click="openCreateDialog"
-                class="bg-blue-600 hover:bg-blue-700 text-white gap-2 flex items-center px-4 py-2 rounded-md transition-colors text-sm font-medium shadow-sm cursor-pointer">
+                class="bg-blue-600 hover:bg-blue-700 text-white gap-2 flex items-center px-4 py-2 rounded-md transition-colors text-sm font-medium shadow-sm cursor-pointer w-full sm:w-auto justify-center">
                 <Plus class="w-4 h-4" />
                 Nuevo Usuario
             </button>

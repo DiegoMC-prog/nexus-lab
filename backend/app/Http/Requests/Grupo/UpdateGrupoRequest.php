@@ -68,4 +68,25 @@ class UpdateGrupoRequest extends FormRequest
             'cupo_maximo.min' => 'El cupo mínimo permitido debe ser de al menos 1 estudiante.',
         ];
     }
+
+    public function withValidator($validator)
+    {
+        $grupo = is_object($this->route('grupo')) ? $this->route('grupo') : \App\Models\Grupo::find($this->route('grupo'));
+
+        $validator->after(function ($validator) use ($grupo) {
+            // Check original group
+            if ($grupo && $grupo->materia && $grupo->materia->semestreAcademico && $grupo->materia->semestreAcademico->isClosed()) {
+                $validator->errors()->add('materia_id', 'No se puede editar un grupo que pertenece a un semestre cerrado.');
+            }
+
+            // Check new materia (if changing)
+            $newMateriaId = $this->input('materia_id');
+            if ($newMateriaId && (!$grupo || $newMateriaId != $grupo->materia_id)) {
+                $newMateria = \App\Models\Materia::with('semestreAcademico')->find($newMateriaId);
+                if ($newMateria && $newMateria->semestreAcademico && $newMateria->semestreAcademico->isClosed()) {
+                    $validator->errors()->add('materia_id', 'No se puede mover el grupo a un semestre cerrado.');
+                }
+            }
+        });
+    }
 }

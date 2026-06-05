@@ -1,7 +1,11 @@
 <template>
-    <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-8 sticky top-0 z-40">
-        <div class="flex items-center gap-4">
-            <h2 class="text-xl font-semibold text-gray-900">Sistema de Control</h2>
+    <header class="bg-white border-b border-gray-200 h-16 flex items-center justify-between px-4 md:px-8 sticky top-0 z-40 shrink-0">
+        <div class="flex items-center gap-3">
+            <button @click="$emit('toggle-sidebar')" class="p-2 -ml-2 text-gray-500 rounded-md hover:bg-gray-100 lg:hidden">
+                <Menu class="h-6 w-6" />
+            </button>
+            <h2 class="text-xl font-semibold text-gray-900 hidden sm:block">Sistema de Control</h2>
+            <h2 class="text-xl font-semibold text-gray-900 sm:hidden">NexusLab</h2>
         </div>
 
         <div class="flex items-center gap-4">
@@ -53,7 +57,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { Bell, User, LogOut, Settings, ChevronDown } from '@lucide/vue';
+import { Bell, User, LogOut, Settings, ChevronDown, Menu } from '@lucide/vue';
 import { useAuthStore } from '@/stores/auth'; // Asegúrate de apuntar a la ruta de tu store
 
 const authStore = useAuthStore();

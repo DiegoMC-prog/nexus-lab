@@ -12,7 +12,9 @@ import GrupoDeleteModal from './GrupoDeleteModal.vue';
 import GrupoEstudiantesModal from './GrupoEstudiantesModal.vue';
 import GrupoEstudiantesVerModal from './GrupoEstudiantesVerModal.vue';
 import { getLaravelValidationErrors } from '@/utils/errorHandler';
+import { useToast } from '@/composables/useToast';
 
+const toast = useToast();
 const authStore = useAuthStore();
 
 // Catálogos cargados de form-data
@@ -128,8 +130,10 @@ const handleSaveGrupo = async (formData: GrupoFormData) => {
     try {
         if (selectedGrupo.value) {
             await grupoService.actualizarGrupo(selectedGrupo.value.id, formData);
+            toast.success('Grupo actualizado', 'El grupo ha sido actualizado correctamente.');
         } else {
             await grupoService.crearGrupo(formData);
+            toast.success('Grupo creado', 'El grupo ha sido registrado correctamente.');
         }
         isFormModalOpen.value = false; // Solo cierra si finaliza con éxito en la BD
         fetchGrupos();
@@ -137,6 +141,9 @@ const handleSaveGrupo = async (formData: GrupoFormData) => {
         console.error('Error al guardar el grupo académico:', error);
         if (error.response && error.response.status === 422) {
             validationErrors.value = getLaravelValidationErrors(error);
+            toast.warning('Errores de validación', 'Por favor revisa los campos del formulario.');
+        } else {
+            toast.error('Error', 'No se pudo guardar la información del grupo.');
         }
     } finally {
         isSaving.value = false;
@@ -149,6 +156,7 @@ const handleConfirmDelete = async () => {
     try {
         await grupoService.eliminarGrupo(selectedGrupo.value.id);
         isDeleteModalOpen.value = false;
+        toast.success('Grupo eliminado', 'El grupo ha sido eliminado correctamente.');
 
         // Regresar de página automáticamente si borramos el único ítem de una sección remota
         if (grupos.value.length === 1 && currentPage.value > 1) {
@@ -158,6 +166,7 @@ const handleConfirmDelete = async () => {
         }
     } catch (error) {
         console.error('Error al intentar eliminar el recurso grupo:', error);
+        toast.error('Error', 'Hubo un problema al intentar eliminar el grupo.');
     } finally {
         isSaving.value = false;
     }

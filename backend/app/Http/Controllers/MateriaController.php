@@ -160,6 +160,12 @@ class MateriaController extends Controller implements HasMiddleware
      */
     public function destroy(Materia $materia)
     {
+        if ($materia->semestreAcademico && $materia->semestreAcademico->isClosed()) {
+            return response()->json([
+                'message' => 'No se puede eliminar una materia que pertenece a un semestre cerrado.',
+            ], 422);
+        }
+
         $materia->delete(null);
 
         return response()->json([

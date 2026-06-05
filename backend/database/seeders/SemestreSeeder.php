@@ -13,21 +13,25 @@ class SemestreSeeder extends Seeder
      */
     public function run(): void
     {
-        $nombreSemestres = [
-            '2022-II',
-            '2023-I',
-            '2023-II',
-            '2024-I',
-            '2024-II',
-            '2025-I',
-            '2025-II',
-            '2026-I (Vigente)',
+        $semestres = [
+            ['nombre' => '2022-II', 'fecha_inicio' => '2022-08-01', 'fecha_fin' => '2022-12-31'],
+            ['nombre' => '2023-I', 'fecha_inicio' => '2023-02-01', 'fecha_fin' => '2023-07-31'],
+            ['nombre' => '2023-II', 'fecha_inicio' => '2023-08-01', 'fecha_fin' => '2023-12-31'],
+            ['nombre' => '2024-I', 'fecha_inicio' => '2024-02-01', 'fecha_fin' => '2024-07-31'],
+            ['nombre' => '2024-II', 'fecha_inicio' => '2024-08-01', 'fecha_fin' => '2024-12-31'],
+            ['nombre' => '2025-I', 'fecha_inicio' => '2025-02-01', 'fecha_fin' => '2025-07-31'],
+            ['nombre' => '2025-II', 'fecha_inicio' => '2025-08-01', 'fecha_fin' => '2025-12-31'],
+            ['nombre' => '2026-I (Vigente)', 'fecha_inicio' => '2026-02-01', 'fecha_fin' => '2026-07-31'],
         ];
 
-        foreach ($nombreSemestres as $nombre) {
-            SemestreAcademico::create([
-                'nombre' => $nombre,
-            ]);
+        foreach ($semestres as $semestre) {
+            SemestreAcademico::updateOrCreate(
+                ['nombre' => $semestre['nombre']],
+                [
+                    'fecha_inicio' => $semestre['fecha_inicio'],
+                    'fecha_fin' => $semestre['fecha_fin'],
+                ]
+            );
         }
     }
 }

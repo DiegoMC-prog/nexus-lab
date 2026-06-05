@@ -161,6 +161,12 @@ class GrupoController extends Controller implements HasMiddleware
      */
     public function destroy(Grupo $grupo)
     {
+        if ($grupo->materia && $grupo->materia->semestreAcademico && $grupo->materia->semestreAcademico->isClosed()) {
+            return response()->json([
+                'message' => 'No se puede eliminar un grupo que pertenece a un semestre cerrado.',
+            ], 422);
+        }
+
         // Control de integridad relacional: Si tiene horarios en laboratorios, denegamos el borrado
         if ($grupo->horarios()->exists()) {
             return response()->json([
@@ -207,6 +213,12 @@ class GrupoController extends Controller implements HasMiddleware
 
     public function actualizarEstudiantesGrupo(Request $request, Grupo $grupo)
     {
+        if ($grupo->materia && $grupo->materia->semestreAcademico && $grupo->materia->semestreAcademico->isClosed()) {
+            return response()->json([
+                'message' => 'No se puede actualizar los estudiantes de un grupo que pertenece a un semestre cerrado.',
+            ], 422);
+        }
+
         $request->validate([
             'users_id' => 'required|array',
             'users_id.*' => 'integer|exists:users,id',

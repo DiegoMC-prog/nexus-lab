@@ -11,6 +11,9 @@ import { getLaravelValidationErrors } from '@/utils/errorHandler';
 import BasePagination from '@/components/BasePagination.vue';
 import ConfigAlertaModal from './ConfigAlertaModal.vue';
 import ConfigAlertaDeleteModal from './ConfigAlertaDeleteModal.vue';
+import { useToast } from '@/composables/useToast';
+
+const toast = useToast();
 
 // --- ESTADOS REACTIVOS ---
 const configs = ref<any[]>([]);
@@ -102,8 +105,10 @@ const handleSaveConfig = async (formData: ConfigAlertaFormData) => {
     try {
         if (selectedConfig.value) {
             await configAlertaService.actualizarConfigAlerta(selectedConfig.value.id, formData);
+            toast.success('Regla actualizada', 'La regla de monitoreo se ha actualizado correctamente.');
         } else {
             await configAlertaService.crearConfigAlerta(formData);
+            toast.success('Regla creada', 'La regla de monitoreo se ha creado correctamente.');
         }
         isFormModalOpen.value = false;
         fetchConfigs();
@@ -111,6 +116,9 @@ const handleSaveConfig = async (formData: ConfigAlertaFormData) => {
         console.error('Error al guardar configuración de alerta:', error);
         if (error.response && error.response.status === 422) {
             validationErrors.value = getLaravelValidationErrors(error);
+            toast.warning('Errores de validación', 'Por favor revisa los campos del formulario.');
+        } else {
+            toast.error('Error', 'No se pudo guardar la regla de monitoreo.');
         }
     } finally {
         isSaving.value = false;
@@ -123,6 +131,7 @@ const handleConfirmDelete = async () => {
     try {
         await configAlertaService.eliminarConfigAlerta(selectedConfig.value.id);
         isDeleteModalOpen.value = false;
+        toast.success('Regla eliminada', 'La regla de monitoreo ha sido eliminada del sistema.');
         if (configs.value.length === 1 && currentPage.value > 1) {
             currentPage.value--;
         } else {
@@ -130,6 +139,7 @@ const handleConfirmDelete = async () => {
         }
     } catch (error) {
         console.error('Error al eliminar configuración de alerta:', error);
+        toast.error('Error', 'Hubo un problema al intentar eliminar la regla.');
     } finally {
         isSaving.value = false;
         selectedConfig.value = null;

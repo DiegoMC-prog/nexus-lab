@@ -7,6 +7,7 @@ import {
 import type { Laboratorio } from '@/types/laboratorio';
 import { estacionService, type EstacionFormData } from '@/services/estacionService';
 import api from '@/services/api';
+import { parseLaravelError } from '@/utils/errorHandler';
 
 // 🚀 1. DEFINIMOS LA INTERFAZ ESTRICTA PARA LAS ESTACIONES PENDIENTES
 interface EstacionPendiente {
@@ -18,7 +19,8 @@ interface EstacionPendiente {
     so_info: string;
     version_agente: string;
     estado: 'pendiente' | 'bloqueado' | 'activo';
-    detectedAt?: string; // Propiedad extendida para la UI de NexusLab
+    detectedAt?: string;
+    vendor?: string;  // OUI / Fabricante de la NIC
 }
 
 // Tipamos los estados posibles del botón de vinculación
@@ -37,6 +39,7 @@ const emit = defineEmits<{
 const isConnected = ref<boolean>(false);
 const detectedStations = ref<EstacionPendiente[]>([]);
 const linkingState = ref<Record<string, LinkingStatus>>({});
+const linkingErrors = ref<Record<string, string>>({});
 const isSimulating = ref<boolean>(false);
 
 // Dejamos que TS infiera el tipo de canal o usamos el fallback de Laravel Echo
@@ -116,11 +119,75 @@ const handleLinkStation = async (station: EstacionPendiente) => {
     } catch (error) {
         console.error('Fallo en la consolidación de la estación:', error);
         linkingState.value[uuid] = 'error';
+        linkingErrors.value[uuid] = parseLaravelError(error);
         setTimeout(() => {
             linkingState.value[uuid] = 'idle';
-        }, 3000);
+            delete linkingErrors.value[uuid];
+        }, 6000);
     }
 };
+
+// --- POOLS DE DATOS REALISTAS PARA EL SIMULADOR ---
+const OUI_VENDORS = [
+    // Dell
+    { prefix: '00:21:70', vendor: 'Dell' },
+    { prefix: '18:03:73', vendor: 'Dell' },
+    { prefix: 'F8:BC:12', vendor: 'Dell' },
+    // HP / Hewlett-Packard
+    { prefix: '00:1E:0B', vendor: 'HP' },
+    { prefix: '3C:D9:2B', vendor: 'HP' },
+    { prefix: 'B4:99:BA', vendor: 'HP' },
+    // Lenovo
+    { prefix: '00:1A:6B', vendor: 'Lenovo' },
+    { prefix: '54:EE:75', vendor: 'Lenovo' },
+    { prefix: 'C8:5B:76', vendor: 'Lenovo' },
+    // Asus
+    { prefix: '00:E0:18', vendor: 'ASUS' },
+    { prefix: 'AC:22:0B', vendor: 'ASUS' },
+    // Acer
+    { prefix: '00:27:0E', vendor: 'Acer' },
+    { prefix: 'E4:CE:8F', vendor: 'Acer' },
+    // Intel NIC (común en cualquier marca)
+    { prefix: '8C:8D:28', vendor: 'Intel' },
+    { prefix: '00:1B:21', vendor: 'Intel' },
+];
+
+const OS_VARIANTS = [
+    'Windows 10 Pro (x64) Build 19045',
+    'Windows 10 Education (x64) Build 19045',
+    'Windows 11 Pro (x64) Build 22631',
+    'Windows 11 Education (x64) Build 22631',
+    'Windows 11 Pro (x64) Build 26100',
+    'Windows 10 Pro (x64) Build 19041',
+    'Windows 11 Home (x64) Build 22631',
+];
+
+const AGENT_VERSIONS = [
+    'v2.0.5-wpf',
+    'v2.1.0-wpf',
+    'v2.0.3-wpf',
+    'v2.1.2-wpf',
+    'v2.2.0-beta',
+];
+
+const HOSTNAME_PREFIXES = ['LAB', 'NEXUS', 'PC', 'WS', 'COMP', 'AULA', 'EST'];
+
+const randHex = () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0').toUpperCase();
+
+const generateMac = (oui: string): string => {
+    const suffix = `${randHex()}:${randHex()}:${randHex()}`;
+    return `${oui}:${suffix}`;
+};
+
+const generateHostname = (labId: number, index: number): string => {
+    const prefix = HOSTNAME_PREFIXES[Math.floor(Math.random() * HOSTNAME_PREFIXES.length)] ?? 'PC';
+    const labNum = String(labId).padStart(2, '0');
+    const pcNum = String(index).padStart(2, '0');
+    return `${prefix}-L${labNum}-PC${pcNum}`;
+};
+
+// Controla el índice de PC para que no repita en la misma sesión
+let simulationIndex = 1;
 
 // --- SIMULADOR DE PRUEBAS MASIVAS ---
 const simulateDetection = async () => {
@@ -128,19 +195,17 @@ const simulateDetection = async () => {
     isSimulating.value = true;
 
     try {
-        // Ejecuta tu ruta simuladora en Laravel Reverb
         await api.post('/api/simulador/vinculacion-abierta', {
             laboratorio_id: props.lab.id
         });
-    } catch (error) {
-        console.warn("[Simulador] Backend offline o ruta de test fallida. Activando Mocking local local.");
+    } catch {
+        console.warn("[Simulador] Backend offline. Activando generador local realista.");
 
-        // 💡 TRUCO DE INGENIERÍA PARA LA DEMO: 
-        // Genera 3 equipos seguidos localmente si no tienes internet o el servidor falla en el aula
-        for (let i = 1; i <= 3; i++) {
-            setTimeout(() => {
-                triggerLocalSimulation();
-            }, i * 400);
+        // Genera entre 1 y 4 equipos con retardos escalonados naturales
+        const count = Math.floor(Math.random() * 3) + 1;
+        for (let i = 0; i < count; i++) {
+            const delay = i * (Math.floor(Math.random() * 300) + 250); // 250–550 ms entre cada uno
+            setTimeout(() => triggerLocalSimulation(), delay);
         }
     } finally {
         isSimulating.value = false;
@@ -148,21 +213,33 @@ const simulateDetection = async () => {
 };
 
 const triggerLocalSimulation = () => {
-    const randomId = Math.floor(Math.random() * 900) + 100;
+    if (!props.lab) return;
 
-    // Fallback seguro de UUID si crypto.randomUUID no está disponible en HTTP local
+    const oui = OUI_VENDORS[Math.floor(Math.random() * OUI_VENDORS.length)];
+    if (!oui) return;
+
+    const os = OS_VARIANTS[Math.floor(Math.random() * OS_VARIANTS.length)] ?? 'Windows 11 Pro (x64) Build 22631';
+    const agentVersion = AGENT_VERSIONS[Math.floor(Math.random() * AGENT_VERSIONS.length)] ?? 'v2.0.5-wpf';
+    const subnet = 100 + (props.lab.id ?? 1);
+    const host = Math.floor(Math.random() * 150) + 10;
+    const pcIndex = simulationIndex++;
+
     const mockUuid = (typeof crypto !== 'undefined' && crypto.randomUUID)
         ? crypto.randomUUID()
-        : `d512a8fa-7299-4c8d-ae9f-e${randomId}5fa7df68`;
+        : `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`.replace(/[xy]/g, c => {
+            const r = Math.random() * 16 | 0;
+            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
 
     const mockPayload: EstacionPendiente = {
-        laboratorio_target_id: props.lab?.id ?? 1,
+        laboratorio_target_id: props.lab.id ?? 1,
         uuid: mockUuid,
-        hostname: `LAB-WPF-PC${randomId.toString().substring(0, 2)}`,
-        direccion_mac: `00:1A:3F:BC:8A:${randomId.toString().substring(1, 3)}`,
-        direccion_ip: `192.168.${props.lab?.id ?? 1}.${Math.floor(Math.random() * 150) + 10}`,
-        so_info: 'Windows 11 Professional (x64) Build 22631',
-        version_agente: 'v2.0.5-wpf',
+        hostname: generateHostname(props.lab.id ?? 1, pcIndex),
+        direccion_mac: generateMac(oui.prefix),
+        direccion_ip: `192.168.${subnet}.${host}`,
+        so_info: os,
+        version_agente: agentVersion,
+        vendor: oui.vendor,
         estado: 'pendiente'
     };
 
@@ -173,6 +250,81 @@ const triggerLocalSimulation = () => {
         });
         linkingState.value[mockPayload.uuid] = 'idle';
     }
+};
+
+const triggerInvalidSimulation = () => {
+    if (!props.lab) return;
+
+    const oui = OUI_VENDORS[Math.floor(Math.random() * OUI_VENDORS.length)];
+    if (!oui) return;
+
+    const os = OS_VARIANTS[Math.floor(Math.random() * OS_VARIANTS.length)] ?? 'Windows 11 Pro (x64) Build 22631';
+    const agentVersion = AGENT_VERSIONS[Math.floor(Math.random() * AGENT_VERSIONS.length)] ?? 'v2.0.5-wpf';
+    const subnet = 100 + (props.lab.id ?? 1);
+    const host = Math.floor(Math.random() * 150) + 10;
+    const pcIndex = simulationIndex++;
+
+    const mockUuid = (typeof crypto !== 'undefined' && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : `xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx`.replace(/[xy]/g, c => {
+            const r = Math.random() * 16 | 0;
+            return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+        });
+
+    // Base con datos inicialmente válidos
+    const mockPayload: EstacionPendiente = {
+        laboratorio_target_id: props.lab.id ?? 1,
+        uuid: mockUuid,
+        hostname: generateHostname(props.lab.id ?? 1, pcIndex) + '-ERR',
+        direccion_mac: generateMac(oui.prefix),
+        direccion_ip: `192.168.${subnet}.${host}`,
+        so_info: os,
+        version_agente: agentVersion,
+        vendor: 'Pirate NIC',
+        estado: 'pendiente'
+    };
+
+    // 🎲 Selección Aleatoria del Tipo de Error a inyectar
+    const errorType = Math.floor(Math.random() * 5);
+    switch (errorType) {
+        case 0:
+            mockPayload.direccion_mac = 'ZZ:YY:XX:WW:VV:UU'; // MAC Inválida
+            mockPayload.vendor = 'MAC Error';
+            break;
+        case 1:
+            mockPayload.direccion_ip = '999.888.777.666'; // IP Inválida
+            mockPayload.vendor = 'IP Error';
+            break;
+        case 2:
+            mockPayload.hostname = 'PC'; // Hostname muy corto (min:3)
+            mockPayload.vendor = 'Hostname Error';
+            break;
+        case 3:
+            mockPayload.uuid = 'formato-invalido-de-uuid'; // UUID Inválido
+            mockPayload.vendor = 'UUID Error';
+            break;
+        case 4:
+            mockPayload.so_info = ''; // SO Vacío (required)
+            mockPayload.vendor = 'SO Error';
+            break;
+    }
+
+    if (!detectedStations.value.some(s => s.uuid === mockPayload.uuid)) {
+        detectedStations.value.unshift({
+            ...mockPayload,
+            detectedAt: new Date().toLocaleTimeString()
+        });
+        linkingState.value[mockPayload.uuid] = 'idle';
+    }
+};
+
+const simulateInvalidDetection = async () => {
+    if (!props.lab) return;
+    isSimulating.value = true;
+    setTimeout(() => {
+        triggerInvalidSimulation();
+        isSimulating.value = false;
+    }, 400);
 };
 
 // --- LISTENERS DEL CICLO DE VIDA ---
@@ -282,60 +434,76 @@ onUnmounted(() => {
                         </h4>
 
                         <div v-for="station in detectedStations" :key="station.uuid"
-                            class="bg-white border border-gray-200 hover:border-blue-300 hover:shadow-xs rounded-xl p-4 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-200">
-                            <div class="space-y-2 flex-1">
-                                <div class="flex items-center gap-2">
-                                    <Laptop class="w-4 h-4 text-slate-700" />
-                                    <span class="font-semibold text-gray-900 text-sm">{{ station.hostname }}</span>
-                                    <span
-                                        class="text-3xs text-gray-400 font-medium px-1.5 py-0.5 bg-slate-100 rounded-md border border-slate-200">
-                                        Detectado {{ station.detectedAt }}
-                                    </span>
+                            class="bg-white border border-gray-200 hover:border-blue-300 hover:shadow-xs rounded-xl p-4 transition-all flex flex-col gap-3 animate-in slide-in-from-top-4 duration-200">
+                            <!-- Info principal -->
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="space-y-2 min-w-0 flex-1">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <Laptop class="w-4 h-4 text-slate-700 shrink-0" />
+                                        <span class="font-semibold text-gray-900 text-sm">{{ station.hostname }}</span>
+                                        <span
+                                            class="text-3xs text-gray-400 font-medium px-1.5 py-0.5 bg-slate-100 rounded-md border border-slate-200 whitespace-nowrap">
+                                            Detectado {{ station.detectedAt }}
+                                        </span>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-2xs text-gray-500">
+                                        <div>
+                                            <span class="font-medium text-gray-400">IP:</span>
+                                            <span class="font-mono text-gray-700"> {{ station.direccion_ip }}</span>
+                                        </div>
+                                        <div>
+                                            <span class="font-medium text-gray-400">Agente:</span>
+                                            <span class="text-gray-700"> {{ station.version_agente }}</span>
+                                        </div>
+                                        <div class="col-span-2 flex items-center gap-1.5 flex-wrap">
+                                            <span class="font-medium text-gray-400">MAC:</span>
+                                            <span class="font-mono text-gray-700 uppercase">{{ station.direccion_mac }}</span>
+                                            <span v-if="station.vendor"
+                                                class="text-2xs bg-slate-100 text-slate-500 border border-slate-200 rounded px-1 py-0.5 font-medium shrink-0">
+                                                {{ station.vendor }}
+                                            </span>
+                                        </div>
+                                        <div class="col-span-2">
+                                            <span class="font-medium text-gray-400">S.O:</span>
+                                            <span class="text-gray-700"> {{ station.so_info }}</span>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-2xs text-gray-500">
-                                    <div><span class="font-medium text-gray-400">IP:</span> <span
-                                            class="font-mono text-gray-700">{{ station.direccion_ip }}</span></div>
-                                    <div><span class="font-medium text-gray-400">MAC:</span> <span
-                                            class="font-mono text-gray-700 uppercase">{{ station.direccion_mac }}</span>
-                                    </div>
-                                    <div class="col-span-2 mt-1">
-                                        <span class="font-medium text-gray-400">S.O:</span> <span
-                                            class="text-gray-700">{{ station.so_info }}</span>
-                                    </div>
-                                    <div class="col-span-2">
-                                        <span class="font-medium text-gray-400">Agente:</span> <span
-                                            class="text-gray-700">{{ station.version_agente }}</span>
-                                    </div>
+                                <!-- Acción de Vinculación -->
+                                <div class="shrink-0">
+                                    <button @click="handleLinkStation(station)"
+                                        :disabled="linkingState[station.uuid] === 'loading' || linkingState[station.uuid] === 'success'"
+                                        :class="[
+                                            'px-3 py-2 text-xs font-semibold rounded-lg shadow-sm border transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap',
+                                            linkingState[station.uuid] === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 shadow-none' :
+                                                linkingState[station.uuid] === 'error' ? 'bg-rose-50 border-rose-200 text-rose-700 shadow-none' :
+                                                    'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 border-blue-600 text-white'
+                                        ]">
+                                        <Loader2 v-if="linkingState[station.uuid] === 'loading'"
+                                            class="w-3.5 h-3.5 animate-spin" />
+                                        <CheckCircle2 v-else-if="linkingState[station.uuid] === 'success'"
+                                            class="w-3.5 h-3.5" />
+                                        <AlertCircle v-else-if="linkingState[station.uuid] === 'error'"
+                                            class="w-3.5 h-3.5" />
+                                        <span>
+                                            {{
+                                                linkingState[station.uuid] === 'loading' ? 'Vinculando...' :
+                                                    linkingState[station.uuid] === 'success' ? 'Vinculado' :
+                                                        linkingState[station.uuid] === 'error' ? 'Error' :
+                                                            'Vincular'
+                                            }}
+                                        </span>
+                                    </button>
                                 </div>
                             </div>
-
-                            <!-- Acciones de Vinculación -->
-                            <div class="shrink-0 flex items-center justify-end">
-                                <button @click="handleLinkStation(station)"
-                                    :disabled="linkingState[station.uuid] === 'loading' || linkingState[station.uuid] === 'success'"
-                                    :class="[
-                                        'px-4 py-2 text-xs font-semibold rounded-lg shadow-sm border transition-all cursor-pointer flex items-center gap-1.5',
-                                        linkingState[station.uuid] === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-700 shadow-none' :
-                                            linkingState[station.uuid] === 'error' ? 'bg-rose-50 border-rose-200 text-rose-700 shadow-none' :
-                                                'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 border-blue-600 text-white'
-                                    ]">
-                                    <Loader2 v-if="linkingState[station.uuid] === 'loading'"
-                                        class="w-3.5 h-3.5 animate-spin" />
-                                    <CheckCircle2 v-else-if="linkingState[station.uuid] === 'success'"
-                                        class="w-3.5 h-3.5" />
-                                    <AlertCircle v-else-if="linkingState[station.uuid] === 'error'"
-                                        class="w-3.5 h-3.5" />
-
-                                    <span>
-                                        {{
-                                            linkingState[station.uuid] === 'loading' ? 'Vinculando...' :
-                                                linkingState[station.uuid] === 'success' ? 'Vinculado' :
-                                                    linkingState[station.uuid] === 'error' ? 'Error' :
-                                                        'Vincular Estación'
-                                        }}
-                                    </span>
-                                </button>
+                            
+                            <!-- Mensaje de Error de Validación -->
+                            <div v-if="linkingState[station.uuid] === 'error' && linkingErrors[station.uuid]" 
+                                class="mt-1 p-2.5 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-2.5 animate-in slide-in-from-top-1 fade-in duration-200">
+                                <AlertCircle class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                                <p class="text-xs text-rose-700 font-medium leading-relaxed whitespace-pre-wrap">{{ linkingErrors[station.uuid] }}</p>
                             </div>
                         </div>
                     </div>
@@ -343,12 +511,21 @@ onUnmounted(() => {
 
                 <!-- Footer Premium con Simulador de WebSocket -->
                 <div class="px-6 py-4 bg-slate-50 border-t border-gray-150 flex items-center justify-between gap-4">
-                    <button @click="simulateDetection" :disabled="isSimulating"
-                        class="px-3.5 py-1.5 bg-white border border-gray-250 text-gray-600 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50/50 rounded-lg transition-all text-xs font-medium cursor-pointer flex items-center gap-1.5 shadow-2xs">
-                        <Sparkles class="w-3.5 h-3.5 text-amber-500 animate-pulse" />
-                        <span>Simular Conexión (Test)</span>
-                        <Loader2 v-if="isSimulating" class="w-3 h-3 animate-spin text-blue-600" />
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button @click="simulateDetection" :disabled="isSimulating"
+                            class="px-3.5 py-1.5 bg-white border border-gray-250 text-gray-600 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50/50 rounded-lg transition-all text-xs font-medium cursor-pointer flex items-center gap-1.5 shadow-2xs">
+                            <Sparkles class="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                            <span>Simular Conexión (Test)</span>
+                            <Loader2 v-if="isSimulating" class="w-3 h-3 animate-spin text-blue-600" />
+                        </button>
+                        
+                        <button @click="simulateInvalidDetection" :disabled="isSimulating"
+                            class="px-3.5 py-1.5 bg-white border border-gray-250 text-gray-600 hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50/50 rounded-lg transition-all text-xs font-medium cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                            title="Genera una estación con datos inválidos para probar la validación">
+                            <AlertCircle class="w-3.5 h-3.5 text-rose-500" />
+                            <span>Inyectar Error</span>
+                        </button>
+                    </div>
 
                     <button @click="emit('close')"
                         class="px-4 py-2 border border-gray-200 text-gray-700 bg-white rounded-lg hover:bg-gray-100 hover:border-gray-300 transition-all text-xs font-medium cursor-pointer">

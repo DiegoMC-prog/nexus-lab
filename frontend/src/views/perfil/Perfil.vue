@@ -7,7 +7,9 @@ import {
 import { perfilService, type Perfil, type PerfilPayload } from '@/services/perfilService';
 import { getLaravelValidationErrors } from '@/utils/errorHandler';
 import { useAuthStore } from '@/stores/auth';
+import { useToast } from '@/composables/useToast';
 
+const toast = useToast();
 const authStore = useAuthStore();
 
 // --- ESTADOS REACTIVOS ---
@@ -70,6 +72,7 @@ const handleSaveProfile = async () => {
         }
 
         showSuccessAlert.value = true;
+        toast.success('Perfil actualizado', 'Los cambios de tu perfil y credenciales han sido guardados.');
         
         // Auto-cerrar alerta tras 4 segundos
         setTimeout(() => {
@@ -79,6 +82,9 @@ const handleSaveProfile = async () => {
         console.error('Error al guardar datos del perfil:', error);
         if (error.response && error.response.status === 422) {
             validationErrors.value = getLaravelValidationErrors(error);
+            toast.warning('Errores de validación', 'Por favor revisa los campos de tu perfil.');
+        } else {
+            toast.error('Error', 'No se pudo guardar la información de tu perfil.');
         }
     } finally {
         isSaving.value = false;

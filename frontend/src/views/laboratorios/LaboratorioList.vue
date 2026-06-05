@@ -14,7 +14,9 @@ import LaboratorioDeleteModal from './LaboratorioDeleteModal.vue';
 import LaboratorioVincularModal from './LaboratorioVincularModal.vue';
 import BasePagination from '@/components/BasePagination.vue';
 import { getLaravelValidationErrors } from '@/utils/errorHandler';
+import { useToast } from '@/composables/useToast';
 
+const toast = useToast();
 const authStore = useAuthStore();
 
 // --- ESTADO REACTIVO DE LA API ---
@@ -128,8 +130,10 @@ const handleSaveLaboratorio = async (formData: LaboratorioFormData) => {
     try {
         if (selectedLab.value?.id) {
             await laboratorioService.actualizarLaboratorio(selectedLab.value.id, formData);
+            toast.success('Laboratorio actualizado', 'El laboratorio se ha actualizado correctamente.');
         } else {
             await laboratorioService.crearLaboratorio(formData);
+            toast.success('Laboratorio creado', 'El laboratorio se ha creado correctamente.');
         }
         isFormDialogOpen.value = false;
         selectedLab.value = null;
@@ -138,6 +142,9 @@ const handleSaveLaboratorio = async (formData: LaboratorioFormData) => {
         console.error('Error al guardar el laboratorio:', error);
         if (error.response && error.response.status === 422) {
             validationErrors.value = getLaravelValidationErrors(error);
+            toast.warning('Errores de validación', 'Por favor revisa los campos del formulario.');
+        } else {
+            toast.error('Error', 'No se pudo guardar la información del laboratorio.');
         }
     } finally {
         isSaving.value = false;
@@ -150,6 +157,7 @@ const handleDeleteLaboratorio = async () => {
         await laboratorioService.eliminarLaboratorio(selectedLab.value.id);
         isDeleteDialogOpen.value = false;
         selectedLab.value = null;
+        toast.success('Laboratorio eliminado', 'El laboratorio ha sido eliminado correctamente.');
 
         // Control automático de desborde de páginas tras eliminar un registro
         if (laboratorios.value.length === 1 && currentPage.value > 1) {
@@ -157,8 +165,13 @@ const handleDeleteLaboratorio = async () => {
         } else {
             await fetchLaboratorios();
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error al eliminar el laboratorio:', error);
+        if (error.response && error.response.status === 422) {
+            toast.warning('No se pudo eliminar', error.response.data.message || 'El laboratorio tiene datos asociados.');
+        } else {
+            toast.error('Error', 'Hubo un problema al intentar eliminar el laboratorio.');
+        }
     }
 };
 </script>

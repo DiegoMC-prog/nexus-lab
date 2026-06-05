@@ -6,13 +6,16 @@ export interface Laboratorio {
     pabellon: string;
     piso: string;
     activo: boolean;
+    capacidad: number;
+    estaciones_count?: number;
 }
 
 export interface LaboratorioFormData {
     nombre: string;
     pabellon: string;
     piso: string;
-    activo: boolean
+    activo: boolean;
+    capacidad: number;
 }
 
 export interface GetLaboratoriosResponse {

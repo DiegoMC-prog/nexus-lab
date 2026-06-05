@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Laboratorio\StoreLaboratorioRequest;
 use App\Http\Requests\Laboratorio\UpdateLaboratorioRequest;
+use App\Models\Estacion;
 use App\Models\Laboratorio;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -51,6 +52,8 @@ class LaboratorioController extends Controller implements HasMiddleware
                 'pabellon' => $laboratorio->pabellon,
                 'piso' => $laboratorio->piso,
                 'activo' => $laboratorio->activo,
+                'capacidad' => $laboratorio->capacidad,
+                'estaciones_count' => $laboratorio->estaciones()->count(),
             ];
         });
 
@@ -71,6 +74,7 @@ class LaboratorioController extends Controller implements HasMiddleware
             'pabellon' => $data->pabellon,
             'piso' => $data->piso,
             'activo' => (bool) $data->activo,
+            'capacidad' => $data->capacidad ?? 30,
         ]);
 
         return response()->json([
@@ -81,6 +85,8 @@ class LaboratorioController extends Controller implements HasMiddleware
                 'pabellon' => $laboratorio->pabellon,
                 'piso' => $laboratorio->piso,
                 'activo' => $laboratorio->activo,
+                'capacidad' => $laboratorio->capacidad,
+                'estaciones_count' => 0,
             ],
         ], 201);
     }
@@ -97,6 +103,8 @@ class LaboratorioController extends Controller implements HasMiddleware
                 'pabellon' => $laboratorio->pabellon,
                 'piso' => $laboratorio->piso,
                 'activo' => $laboratorio->activo,
+                'capacidad' => $laboratorio->capacidad,
+                'estaciones_count' => $laboratorio->estaciones()->count(),
             ],
         ], 200);
     }
@@ -113,6 +121,7 @@ class LaboratorioController extends Controller implements HasMiddleware
             'pabellon' => $data->pabellon,
             'piso' => $data->piso,
             'activo' => $data->activo,
+            'capacidad' => $data->capacidad ?? $laboratorio->capacidad,
         ]);
 
         $laboratorio->refresh();
@@ -124,6 +133,8 @@ class LaboratorioController extends Controller implements HasMiddleware
                 'pabellon' => $laboratorio->pabellon,
                 'piso' => $laboratorio->piso,
                 'activo' => $laboratorio->activo,
+                'capacidad' => $laboratorio->capacidad,
+                'estaciones_count' => $laboratorio->estaciones()->count(),
             ],
         ]);
     }
@@ -133,6 +144,13 @@ class LaboratorioController extends Controller implements HasMiddleware
      */
     public function destroy(Laboratorio $laboratorio)
     {
+        if ($laboratorio->horarios()->exists()) {
+            return response()->json([
+                'message' => 'El laboratorio tiene horarios asignados.',
+                'errors' => ['laboratorio' => ['No se puede eliminar el laboratorio porque tiene horarios de materias asignados.']]
+            ], 422);
+        }
+
         $laboratorio->delete();
 
         return response()->json([
@@ -159,11 +177,26 @@ class LaboratorioController extends Controller implements HasMiddleware
             'uuids.*'        => 'uuid'
         ]);
 
+        $laboratorio = Laboratorio::findOrFail($request->laboratorio_id);
+        $nuevas = count($request->uuids);
+        $actuales = $laboratorio->estaciones()->count();
+        $capacidad = $laboratorio->capacidad ?? 30;
+
+        if (($actuales + $nuevas) > $capacidad) {
+            $disponibles = $capacidad - $actuales;
+            return response()->json([
+                'message' => "El laboratorio ha alcanzado su aforo máximo.",
+                'errors'  => [
+                    'capacidad' => ["El laboratorio '" . $laboratorio->nombre . "' tiene capacidad para {$capacidad} estaciones. Actualmente hay {$actuales} registradas y solo puede incorporar {$disponibles} más."]
+                ]
+            ], 422);
+        }
+
         // Actualización masiva eficiente mediante Eloquent
-        \App\Models\Estacion::whereIn('uuid', $request->uuids)
+        Estacion::whereIn('uuid', $request->uuids)
             ->update([
                 'laboratorio_id' => $request->laboratorio_id,
-                'estado'         => 'desconectado' // Cambia de 'pendiente' a listo para operar
+                'estado'         => 'desconectado'
             ]);
 
         return response()->json(['status' => 'success', 'message' => 'Estaciones vinculadas correctamente.']);

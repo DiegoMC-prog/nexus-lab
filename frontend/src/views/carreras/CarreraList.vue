@@ -10,7 +10,9 @@ import BasePagination from '@/components/BasePagination.vue';
 import CarreraModal from './CarreraModal.vue';
 import CarreraDeleteModal from './CarreraDeleteModal.vue';
 import { getLaravelValidationErrors } from '@/utils/errorHandler';
+import { useToast } from '@/composables/useToast';
 
+const toast = useToast();
 const authStore = useAuthStore();
 
 // Estados Reactivos de Datos
@@ -88,8 +90,10 @@ const handleSaveCarrera = async (formData: CarreraFormData) => {
     try {
         if (selectedCarrera.value) {
             await carreraService.actualizarCarrera(selectedCarrera.value.id, formData);
+            toast.success('Carrera actualizada', 'Los datos de la carrera se han actualizado correctamente.');
         } else {
             await carreraService.crearCarrera(formData);
+            toast.success('Carrera creada', 'La carrera se ha registrado correctamente.');
         }
         isFormModalOpen.value = false; // Solo cierra si finaliza con éxito en la BD
         fetchCarreras();
@@ -97,6 +101,9 @@ const handleSaveCarrera = async (formData: CarreraFormData) => {
         console.error('Error al guardar la carrera:', error);
         if (error.response && error.response.status === 422) {
             validationErrors.value = getLaravelValidationErrors(error);
+            toast.warning('Errores de validación', 'Por favor revisa los campos del formulario.');
+        } else {
+            toast.error('Error', 'No se pudo guardar la información de la carrera.');
         }
     } finally {
         isSaving.value = false;
@@ -109,6 +116,7 @@ const handleConfirmDelete = async () => {
     try {
         await carreraService.eliminarCarrera(selectedCarrera.value.id);
         isDeleteModalOpen.value = false;
+        toast.success('Carrera eliminada', 'La carrera ha sido eliminada correctamente del sistema.');
 
         // Regresar de página automáticamente si borramos el único ítem de una sección remota
         if (carreras.value.length === 1 && currentPage.value > 1) {
@@ -118,6 +126,7 @@ const handleConfirmDelete = async () => {
         }
     } catch (error) {
         console.error('Error al intentar eliminar el recurso:', error);
+        toast.error('Error', 'Hubo un problema al intentar eliminar la carrera.');
     } finally {
         isSaving.value = false;
     }
@@ -129,7 +138,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="p-6 space-y-6 relative">
+    <div class="p-4 md:p-6 space-y-4 md:space-y-6 relative">
         <div v-if="isLoading"
             class="absolute inset-0 bg-white/40 backdrop-blur-xs z-50 flex items-center justify-center min-h-100 rounded-xl transition-all">
             <div class="bg-white p-4 rounded-xl shadow-lg border border-gray-100 flex items-center gap-3">
@@ -149,7 +158,7 @@ onMounted(() => {
                 </p>
             </div>
             <button v-if="authStore.can('carreras.crear')" @click="openCreateModal"
-                class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm gap-2 transition-colors text-sm">
+                class="inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg shadow-sm gap-2 transition-colors text-sm w-full sm:w-auto">
                 <Plus class="w-4 h-4" />
                 Nueva Carrera
             </button>

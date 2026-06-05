@@ -191,6 +191,12 @@ class HorarioController extends Controller implements HasMiddleware
      */
     public function destroy(Horario $horario)
     {
+        if ($horario->grupo && $horario->grupo->materia && $horario->grupo->materia->semestreAcademico && $horario->grupo->materia->semestreAcademico->isClosed()) {
+            return response()->json([
+                'message' => 'No se puede eliminar un horario que pertenece a un semestre cerrado.',
+            ], 422);
+        }
+
         $horario->delete(null);
 
         return response()->json([

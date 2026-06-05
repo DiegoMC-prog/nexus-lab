@@ -10,7 +10,9 @@ import BasePagination from '@/components/BasePagination.vue';
 import MateriaModal from './MateriaModal.vue';
 import MateriaDeleteModal from './MateriaDeleteModal.vue';
 import { getLaravelValidationErrors } from '@/utils/errorHandler';
+import { useToast } from '@/composables/useToast';
 
+const toast = useToast();
 const authStore = useAuthStore();
 
 // Catálogos cargados de form-data
@@ -116,8 +118,10 @@ const handleSaveMateria = async (formData: MateriaFormData) => {
     try {
         if (selectedMateria.value) {
             await materiaService.actualizarMateria(selectedMateria.value.id, formData);
+            toast.success('Materia actualizada', 'La materia ha sido actualizada correctamente.');
         } else {
             await materiaService.crearMateria(formData);
+            toast.success('Materia creada', 'La materia ha sido registrada correctamente.');
         }
         isFormModalOpen.value = false; // Solo cierra si finaliza con éxito en la BD
         fetchMaterias();
@@ -125,6 +129,9 @@ const handleSaveMateria = async (formData: MateriaFormData) => {
         console.error('Error al guardar la materia:', error);
         if (error.response && error.response.status === 422) {
             validationErrors.value = getLaravelValidationErrors(error);
+            toast.warning('Errores de validación', 'Por favor revisa los campos del formulario.');
+        } else {
+            toast.error('Error', 'No se pudo guardar la información de la materia.');
         }
     } finally {
         isSaving.value = false;
@@ -137,6 +144,7 @@ const handleConfirmDelete = async () => {
     try {
         await materiaService.eliminarMateria(selectedMateria.value.id);
         isDeleteModalOpen.value = false;
+        toast.success('Materia eliminada', 'La materia ha sido eliminada correctamente.');
 
         // Regresar de página automáticamente si borramos el único ítem de una sección remota
         if (materias.value.length === 1 && currentPage.value > 1) {
@@ -146,6 +154,7 @@ const handleConfirmDelete = async () => {
         }
     } catch (error) {
         console.error('Error al intentar eliminar el recurso:', error);
+        toast.error('Error', 'Hubo un problema al intentar eliminar la materia.');
     } finally {
         isSaving.value = false;
     }

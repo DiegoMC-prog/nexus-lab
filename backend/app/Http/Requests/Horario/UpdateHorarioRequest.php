@@ -56,7 +56,22 @@ class UpdateHorarioRequest extends FormRequest
 
     public function withValidator($validator)
     {
-        $validator->after(function ($validator) {
+        $horario = is_object($this->route('horario')) ? $this->route('horario') : \App\Models\Horario::find($this->route('horario'));
+
+        $validator->after(function ($validator) use ($horario) {
+            // Check original group
+            if ($horario && $horario->grupo && $horario->grupo->materia && $horario->grupo->materia->semestreAcademico && $horario->grupo->materia->semestreAcademico->isClosed()) {
+                $validator->errors()->add('grupo_id', 'No se puede editar un horario que pertenece a un semestre cerrado.');
+            }
+
+            // Check new group (if changing)
+            $newGrupoId = $this->input('grupo_id');
+            if ($newGrupoId && (!$horario || $newGrupoId != $horario->grupo_id)) {
+                $newGrupo = \App\Models\Grupo::with('materia.semestreAcademico')->find($newGrupoId);
+                if ($newGrupo && $newGrupo->materia && $newGrupo->materia->semestreAcademico && $newGrupo->materia->semestreAcademico->isClosed()) {
+                    $validator->errors()->add('grupo_id', 'No se puede mover el horario a un semestre cerrado.');
+                }
+            }
 
             if ($validator->errors()->any()) {
                 return;

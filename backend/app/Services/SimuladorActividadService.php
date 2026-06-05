@@ -84,6 +84,11 @@ class SimuladorActividadService
             ];
         }
 
+        if (count($clasesSimuladas) > 0) {
+            // Notificar a todos los clientes WebSocket que las estaciones han cambiado
+            broadcast(new \App\Events\EstacionesActualizadas())->toOthers();
+        }
+
         return [
             'status' => 'success',
             'message' => 'Simulación de actividad ejecutada con éxito para los laboratorios activos.',
@@ -142,6 +147,11 @@ class SimuladorActividadService
 
         if ($estacionesCount < $stationLimit) {
             for ($i = $estacionesCount + 1; $i <= $stationLimit; $i++) {
+                $estadoRand = rand(1, 100);
+                $estadoInicial = 'activo';
+                if ($estadoRand <= 10) $estadoInicial = 'mantenimiento';
+                elseif ($estadoRand <= 25) $estadoInicial = 'inactiva';
+
                 Estacion::create([
                     'laboratorio_id' => $laboratorioId,
                     'uuid' => (string) Str::uuid(),
@@ -149,9 +159,9 @@ class SimuladorActividadService
                     'direccion_mac' => "00:1A:3F:8A:BC:" . Str::padLeft(dechex($i + 32), 2, '0', STR_PAD_LEFT),
                     'direccion_ip' => "192.168.{$laboratorioId}." . (10 + $i),
                     'so_info' => $i % 4 === 0 ? 'Ubuntu 22.04 LTS (x64)' : 'Windows 11 Professional (x64) Build 22631',
-                    'estado' => 'activo',
+                    'estado' => $estadoInicial,
                     'version_agente' => 'v2.1.0-wpf',
-                    'ultima_conexion' => now()
+                    'ultima_conexion' => $estadoInicial === 'inactiva' ? null : now()
                 ]);
             }
         }
@@ -175,7 +185,26 @@ class SimuladorActividadService
 
         foreach ($estaciones as $estacion) {
             $isBlocked = $estacion->estado === 'bloqueado';
+            $isMantenimiento = $estacion->estado === 'mantenimiento';
+            $isInactiva = $estacion->estado === 'inactiva';
             $estudianteId = $estacion->estudiante_actual_id;
+
+            if ($isMantenimiento) {
+                // Las estaciones en mantenimiento rara vez cambian por sí solas, 2% de probabilidad de ser reparadas
+                if (rand(1, 100) <= 2) {
+                    $estacion->update(['estado' => 'inactiva']);
+                }
+                continue;
+            }
+
+            if ($isInactiva) {
+                // Las estaciones inactivas tienen un 15% de probabilidad de ser encendidas por un estudiante
+                if (rand(1, 100) <= 15) {
+                    $estacion->update(['estado' => 'activo', 'ultima_conexion' => now()]);
+                } else {
+                    continue;
+                }
+            }
 
             if ($isBlocked) {
                 // Si la estación está bloqueada por el docente, preservamos su estado e inmovilidad,
@@ -210,11 +239,22 @@ class SimuladorActividadService
                     }
                 }
 
+                // Simular fallos aleatorios o apagones (5% de probabilidad de dejar de estar activa)
+                $nuevoEstado = 'activo';
+                if (rand(1, 100) <= 5) {
+                    $nuevoEstado = rand(1, 100) <= 50 ? 'inactiva' : 'mantenimiento';
+                    $estudianteId = null;
+                }
+
                 $estacion->update([
-                    'ultima_conexion' => now(),
+                    'ultima_conexion' => $nuevoEstado === 'inactiva' ? $estacion->ultima_conexion : now(),
                     'estudiante_actual_id' => $estudianteId,
-                    'estado' => 'activo'
+                    'estado' => $nuevoEstado
                 ]);
+                
+                if ($nuevoEstado !== 'activo') {
+                    continue; // No generamos telemetría para estaciones que acaban de morir
+                }
             }
 
             // Generar un nuevo registro de telemetría remota realista

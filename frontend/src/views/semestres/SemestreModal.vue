@@ -16,7 +16,9 @@ const emit = defineEmits<{
 }>();
 
 const formData = ref<SemestreFormData>({
-    nombre: ''
+    nombre: '',
+    fecha_inicio: '',
+    fecha_fin: ''
 });
 
 const isEditing = computed(() => !!props.semestre);
@@ -26,10 +28,12 @@ watch(() => props.modelValue, (isOpen) => {
     if (isOpen) {
         if (props.semestre) {
             formData.value = {
-                nombre: props.semestre.nombre
+                nombre: props.semestre.nombre,
+                fecha_inicio: props.semestre.fecha_inicio,
+                fecha_fin: props.semestre.fecha_fin
             };
         } else {
-            formData.value = { nombre: '' };
+            formData.value = { nombre: '', fecha_inicio: '', fecha_fin: '' };
         }
     }
 });
@@ -75,6 +79,32 @@ const handleSubmit = () => {
                         <p v-if="validationErrors?.nombre" class="text-xs text-red-500 mt-1 block">
                             {{ validationErrors.nombre[0] }}
                         </p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                Fecha de Inicio
+                            </label>
+                            <input v-model="formData.fecha_inicio" type="date" required :disabled="isSaving"
+                                class="w-full px-3 py-2 bg-white border text-gray-900 placeholder:text-gray-400 rounded-lg focus:outline-none focus:ring-2 text-sm transition-all"
+                                :class="validationErrors?.fecha_inicio ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'" />
+                            <p v-if="validationErrors?.fecha_inicio" class="text-xs text-red-500 mt-1 block">
+                                {{ validationErrors.fecha_inicio[0] }}
+                            </p>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                Fecha de Fin
+                            </label>
+                            <input v-model="formData.fecha_fin" type="date" required :disabled="isSaving"
+                                class="w-full px-3 py-2 bg-white border text-gray-900 placeholder:text-gray-400 rounded-lg focus:outline-none focus:ring-2 text-sm transition-all"
+                                :class="validationErrors?.fecha_fin ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : 'border-gray-200 focus:ring-blue-500 focus:border-blue-500'" />
+                            <p v-if="validationErrors?.fecha_fin" class="text-xs text-red-500 mt-1 block">
+                                {{ validationErrors.fecha_fin[0] }}
+                            </p>
+                        </div>
                     </div>
 
                     <div class="mt-6 pt-4 border-t border-gray-100 flex justify-end gap-3 bg-gray-50 -mx-6 -mb-6 p-4">
