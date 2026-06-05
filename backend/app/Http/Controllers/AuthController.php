@@ -4,11 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\VerifyOtpRequest;
-use App\Mail\UserOtpMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
 {
@@ -61,23 +59,10 @@ class AuthController extends Controller
             ]);
         }
 
-        $otp = str_pad((string)random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
-
-        $user->update([
-            'otp_code' => Hash::make($otp),
-            'otp_expires_at' => now()->addMinutes(15),
-        ]);
-
-        Mail::to($user->email)->send(new UserOtpMail($otp));
-
         $response = [
             'requires_otp' => true,
-            'message' => 'Código enviado a tu correo.'
+            'message' => 'Por favor, ingrese el código de su aplicación autenticadora (TOTP).'
         ];
-
-        if (app()->environment('local')) {
-            $response['otp'] = $otp;
-        }
 
         return response()->json($response);
     }
@@ -88,7 +73,14 @@ class AuthController extends Controller
 
         $user = User::query()->where('email', $validado->email)->first();
 
-        if (!Hash::check($validado->otp_code, $user->otp_code) || now()->isAfter($user->otp_expires_at)) {
+        if (empty($user->totp_secret)) {
+            return response()->json(['message' => 'Autenticación 2FA no configurada para este usuario.'], 422);
+        }
+
+        $google2fa = app('pragmarx.google2fa');
+        $valid = $google2fa->verifyKey($user->totp_secret, $validado->otp_code);
+
+        if (!$valid) {
             return response()->json(['message' => 'Código incorrecto o expirado'], 422);
         }
 
@@ -109,10 +101,7 @@ class AuthController extends Controller
             'nombre_dispositivo' => 'pc_' . rand(0, 1000000),
         ]);
 
-        $user->update([
-            'otp_code' => null,
-            'otp_expires_at' => null
-        ]);
+
 
         return response()->json([
             'message' => 'Usuario autenticado, Bienvenido de vuelta',
