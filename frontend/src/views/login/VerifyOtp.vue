@@ -175,8 +175,8 @@ const handleResend = () => {
 
                 <h2 class="text-2xl font-semibold text-gray-900 mb-2">Verificar Código</h2>
                 <p class="text-gray-600 mb-6">
-                    Ingrese el código de 6 dígitos enviado a
-                    <span class="font-medium text-gray-900">{{ email || 'su correo' }}</span>
+                    Ingrese el código de 6 dígitos generado por su 
+                    <span class="font-medium text-gray-900">Aplicación Autenticadora</span> (Google Authenticator, Authy, etc).
                 </p>
 
                 <!-- Alerta de Error -->
@@ -202,26 +202,9 @@ const handleResend = () => {
                     </button>
                 </form>
 
-                <!-- Reenvío del Código -->
-                <div class="mt-6 text-center">
-                    <p class="text-sm text-gray-600">
-                        ¿No recibió el código?
-                        <span v-if="resendCooldown > 0" class="text-gray-500">
-                            Reenviar en {{ resendCooldown }}s
-                        </span>
-                        <button v-else @click="handleResend"
-                            class="text-blue-600 hover:text-blue-700 font-medium bg-transparent border-none cursor-pointer p-0">
-                            Reenviar código
-                        </button>
-                    </p>
-                </div>
 
-                <!-- Nota Informativa Local -->
-                <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p class="text-xs text-blue-800 text-center">
-                        <strong>Demo:</strong> El código de verificación es: <strong>123456</strong>
-                    </p>
-                </div>
+
+
             </div>
 
         </div>

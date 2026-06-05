@@ -14,7 +14,26 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1 Administrador
+        // Evaluador Administrador (Requerido por Rúbrica)
+        $adminRubrica = User::factory()->create([
+            'name' => 'Admin Evaluador',
+            'email' => 'admin@prueba.com',
+            'password' => Hash::make('Admin123!'),
+            'totp_secret' => 'JBSWY3DPEHPK3PXP',
+        ]);
+        $adminRubrica->assignRole('admin');
+
+        // Evaluador Usuario Regular (Requerido por Rúbrica)
+        $userRubrica = User::factory()->create([
+            'name' => 'Usuario Evaluador',
+            'email' => 'user@prueba.com',
+            'password' => Hash::make('User123!'),
+            'totp_secret' => 'KNRW24TMMJQXEZLJ',
+        ]);
+        // Asignamos rol docente (usuario regular del sistema)
+        $userRubrica->assignRole('docente');
+
+        // Administrador Original
         $user = User::factory()->create([
             'name' => 'Admin User',
             'email' => 'diegomarca736@gmail.com',

@@ -15,7 +15,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Spatie\Permission\Traits\HasRoles;
 
-#[Fillable(['name', 'email', 'password', 'otp_code', 'otp_expires_at', 'estado'])]
+#[Fillable(['name', 'email', 'password', 'totp_secret', 'estado'])]
 #[Hidden(['password', 'remember_token'])]
 #[Appends(['role', 'permisos'])]
 class User extends Authenticatable
